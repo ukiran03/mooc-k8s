@@ -1,24 +1,12 @@
-*** 1.2. The project, step 1
+*** 1.4. The project, step 2
 
 #+begin_src bash
-# How to start the server
-PORT=8080 go run main.go
 
-# Build the local image
-docker build -t todo-app.mooc:1.2 .
-
-# Import the local image
-k3d image import todo-app.mooc:1.2 -c k3s-default
-
-# Create Deployment with local image
-kubectl create deployment todo-app-dep --image=todo-app.mooc:1.2
+# Apply manifests
+kubectl apply -f manifests
 
 # Checking
-# STATUS: CrashLoopBackOff due to missing env PORT
 kubectl get deployments
 kubectl get pods
 
-# Check Logs
-$ kubectl logs -f todo-app-dep-7d7d85cbdc-9vmr5
-2026/06/18 07:05:39 Error: env PORT was unset
 #+end_src
