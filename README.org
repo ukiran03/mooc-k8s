@@ -2,3 +2,4 @@
 
 **** Chapter 2: Kubernetes basics
 - [[https://github.com/ukiran03/mooc-k8s/tree/1.1/log-output][1.1.]] Getting started
+- [[https://github.com/ukiran03/mooc-k8s/tree/1.2/todo-app][1.2.]] The project, step 1
