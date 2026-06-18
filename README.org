@@ -1,0 +1,4 @@
+*** [[https://courses.mooc.fi/org/uh-cs/courses/devops-with-kubernetes-2026][MOOC]] Devops with Kubernetes' submissions
+
+**** Chapter 2: Kubernetes basics
+- [[https://github.com/ukiran03/mooc-k8s/tree/1.1/log-output][1.1.]] Getting started
