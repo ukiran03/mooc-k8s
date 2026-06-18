@@ -1,19 +1,12 @@
-*** 1.1. Getting started
+*** 1.3. Declarative approach
 
 #+begin_src bash
-# Build the local image
-docker build -t log-output:v1.1 .
 
-# Import the local image
-k3d image import log-output:v1.1 -c k3s-default
-
-# Create Deployment with local image
-kubectl create deployment log-output-dep --image=log-output:v1.1
+# Apply manifests
+kubectl apply -f manifests
 
 # Checking
 kubectl get deployments
 kubectl get pods
 
-# Check Logs
-kubectl logs -f log-output-dep-7c5d45c777-lpgmf
 #+end_src
