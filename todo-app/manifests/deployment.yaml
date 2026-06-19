@@ -14,5 +14,8 @@ spec:
     spec:
       containers:
         - name: todo-app
-          image: todo-app.mooc:1.2
-          imagePullPolicy: Never
+          image: todo-app.mooc:1.5
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PORT
+              value: "3000"

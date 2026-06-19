@@ -2,6 +2,9 @@
 
 #+begin_src bash
 
+# Build local Image
+docker build -t todo-app.mooc:1.5 .
+
 # Apply manifests
 kubectl apply -f manifests
 
