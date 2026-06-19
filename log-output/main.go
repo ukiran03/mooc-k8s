@@ -1,41 +1,42 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"fmt"
-	"log"
-	"math/rand/v2"
-	"time"
+	"net/http"
+	"os"
 )
 
-const charset = "abcdefghijklmnopqrstuvwxyz" + "01234567890123456789"
-
-func stringWithCharset(length int) string {
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.IntN(len(charset))]
-	}
-	return string(b)
+type Pair struct {
+	key   string
+	value string
 }
 
-func newRandString() string {
-	return fmt.Sprintf(
-		"%s-%s-%s-%s-%s",
-		stringWithCharset(8),
-		stringWithCharset(4),
-		stringWithCharset(4),
-		stringWithCharset(4),
-		stringWithCharset(8),
-	)
+func secureRandomString() string {
+	b := make([]byte, 4) // 4 bytes = 8 hex characters
+	rand.Read(b)
+	return hex.EncodeToString(b)
 }
 
 func main() {
-	str := newRandString()
-	log.Println(str)
-
-	ticker := time.NewTicker(5 * time.Second)
-	defer ticker.Stop()
-
-	for range ticker.C {
-		log.Println(str)
+	port := os.Getenv("PORT")
+	if port == "" {
+		fmt.Println("env PORT was unset\nUsing Port 3000")
+		port = "3000"
 	}
+	addr := ":" + port
+	keyStr := secureRandomString()
+	srv := &Pair{key: keyStr}
+
+	http.ListenAndServe(addr, srv)
+}
+
+func (p *Pair) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/favicon.ico" {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	val := secureRandomString()
+	fmt.Fprintf(w, "%s: %s", p.key, val)
 }
