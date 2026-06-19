@@ -10,3 +10,4 @@
 - [[https://github.com/ukiran03/mooc-k8s/tree/1.5/todo-app][1.5.]] The project, step 3
 - [[https://github.com/ukiran03/mooc-k8s/tree/1.6/todo-app][1.6.]] The project, step 4
 - [[https://github.com/ukiran03/mooc-k8s/tree/1.7/log-output][1.7.]] External access with Ingress
+- [[https://github.com/ukiran03/mooc-k8s/tree/1.8/todo-app][1.8.]] The project, step 5

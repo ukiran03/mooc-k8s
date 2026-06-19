@@ -5,4 +5,7 @@
 # Apply manifests
 kubectl apply -f manifests
 
+# Access via load balancer
+curl http://localhost:8081/
+
 #+end_src

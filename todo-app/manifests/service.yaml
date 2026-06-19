@@ -3,12 +3,10 @@ kind: Service
 metadata:
   name: todo-app-svc
 spec:
-  type: NodePort
+  type: ClusterIP              # service with IP accessible inside cluster
   selector:
     app: todo-app              # This is the app as declared in the deployment.
   ports:
-    - name: http
-      nodePort: 30080          # port exposed for external access
+    - port: 1234               # port on internal service IP
       protocol: TCP
-      port: 1234               # port exposed for internal access
       targetPort: 3000         # the target port
