@@ -1,20 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: log-output-dep
+  name: log-get-data-dep
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: log-output
+      app: log-get-data
   template:
     metadata:
       labels:
-        app: log-output
+        app: log-get-data
     spec:
+      volumes:
+        - name: shared-data
+          emptyDir: {}
       containers:
-        - name: log-output
-          image: ushakiran369/log-output:1.7
+        - name: log-data
+          image: ushakiran369/log-data:1.10
+          volumeMounts:
+            - name: shared-data
+              mountPath: /usr/src/app
           env:
+            - name: OUTFILE
+              value: "/usr/src/app/output.txt"
+        - name: get-data
+          image: ushakiran369/get-data:1.10
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: shared-data
+              mountPath: /usr/src/app
+          env:
+            - name: OUTFILE
+              value: "/usr/src/app/output.txt"
             - name: PORT
               value: "3000"

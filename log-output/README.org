@@ -1,8 +1,11 @@
-*** 1.7. External access with Ingress
+*** 1.10. Even more services
 
 #+begin_src bash
 
 # Apply manifests
 kubectl apply -f manifests
+
+# Visit
+curlie localhost:8081
 
 #+end_src
