@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong-log-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pong-log
+  template:
+    metadata:
+      labels:
+        app: pong-log
+    spec:
+      volumes:
+        - name: shared-pong-log-vol
+          persistentVolumeClaim:
+            claimName: pong-log-claim
+      containers:
+        - name: log-output
+          image: ushakiran369/log-output:1.11
+          env:
+            - name: PONGFILE
+              value: "/usr/src/app/pong.txt"
+            - name: PORT
+              value: "3000"
+          volumeMounts:
+            - name: shared-pong-log-vol
+              mountPath: /usr/src/app/
+        - name: ping-pong
+          image: ushakiran369/ping-pong:1.11
+          env:
+            - name: PONGFILE
+              value: "/usr/src/app/pong.txt"
+            - name: PORT
+              value: "3001"
+          volumeMounts:
+            - name: shared-pong-log-vol
+              mountPath: /usr/src/app/
