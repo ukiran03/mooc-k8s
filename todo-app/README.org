@@ -1,4 +1,4 @@
-*** 1.4. The project, step 2
+*** 1.12. The project, step 6
 
 #+begin_src bash
 
@@ -9,3 +9,9 @@ kubectl apply -f manifests
 curl http://localhost:8081/
 
 #+end_src
+
+#+CAPTION: Todo App demo from exercise 1.12
+#+NAME:   fig:my-image
+#+ATTR_ORG: :width 250
+#+ATTR_HTML: :width 250px
+[[./demo.jpg]]

@@ -2,31 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{.Title}}</title>
     <style>
+        /* Center everything on the page cleanly */
         body {
-            font-family: sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             text-align: center;
-            margin-top: 50px;
-            background-color: #f7f9fa;
         }
-        .container {
+
+        /* Container to keep content constrained and neat */
+        .card {
             background: white;
-            display: inline-block;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            max-width: 600px;
+            width: 100%;
         }
+
         h1 {
-            color: #00ADD8;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            color: #1a1a1a;
+        }
+
+        /* Styling for the image with rounded corners */
+        .app-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Message placed cleanly at the bottom */
+        .message {
+            margin-top: 20px;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .no-image {
+            color: #999;
+            font-style: italic;
+            padding: 40px 0;
         }
     </style>
 </head>
 <body>
-    <div class="container">
+
+    <div class="card">
         <h1>{{.Title}}</h1>
-        <p>{{.Message}}</p>
-        <p>Current Status: <strong>Online</strong></p>
+
+        {{if .Image}}
+            <img src="{{.Image}}" alt="Dynamic App Image" class="app-image">
+        {{else}}
+            <p class="no-image">No image available.</p>
+        {{end}}
+
+            <p class="message">{{.Message}}</p>
+            <br/>
+            <strong>DevOps with Kubernetes 2026</strong>
     </div>
+
 </body>
 </html>

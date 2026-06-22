@@ -9,4 +9,4 @@ spec:
   ports:
     - port: 1234               # port on internal service IP
       protocol: TCP
-      targetPort: 3000         # the target port
+      targetPort: 3000         # the target port, our app listening

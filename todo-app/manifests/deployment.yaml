@@ -12,9 +12,18 @@ spec:
       labels:
         app: todo-app
     spec:
+      volumes:
+        - name: todo-app-vol
+          persistentVolumeClaim:
+            claimName: todo-app-claim
       containers:
         - name: todo-app
-          image:  ushakiran369/todo-app.mooc:1.5
+          image:  ushakiran369/todo-app:1.12
+          ports:
+            - containerPort: 3000 # Explicitly document the port
           env:
             - name: PORT
               value: "3000"
+          volumeMounts:
+            - name: todo-app-vol
+              mountPath: /usr/src/app
