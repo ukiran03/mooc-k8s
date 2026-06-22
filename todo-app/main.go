@@ -22,7 +22,7 @@ var currentImage = &Image{}
 
 const (
 	pathname = "./image.jpg"
-	url      = "https://placeholdpicsum.dev/photo/category/nature/400/400"
+	url      = "https://placeholdpicsum.dev/photo/category/nature/250/250"
 )
 
 type Image struct {
@@ -66,7 +66,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := PageData{
 		Title:   "Todo App",
-		Message: "This is from Exercise: 1.12",
+		Message: "This is from Exercise: 1.13",
 		Image:   "/image.jpg", // the route pointing to our handler above
 	}
 
