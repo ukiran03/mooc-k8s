@@ -19,3 +19,5 @@
 - [[https://github.com/ukiran03/mooc-k8s/tree/1.13/todo-app][1.13.]] The project, step 7
 
 **** Chapter 3: More building blocks
+***** Networking between pods
+- [[https://github.com/ukiran03/mooc-k8s/tree/2.1/log-output-ping-pong][2.1.]] Connecting pods

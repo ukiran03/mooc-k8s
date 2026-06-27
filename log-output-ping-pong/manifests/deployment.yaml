@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pong-log-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pong-log
+  template:
+    metadata:
+      labels:
+        app: pong-log
+    spec:
+      containers:
+        - name: log-output
+          image: ushakiran369/log-output:2.1.v2
+          env:
+            - name: PORT
+              value: "3000"
+            - name: PING_PORT   # request pings on port
+              value: "3001"
+        - name: ping-pong
+          image: ushakiran369/ping-pong:2.1.v2
+          env:
+            - name: PING_PORT   # serve pings on port
+              value: "3001"
