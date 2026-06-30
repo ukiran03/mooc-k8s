@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+	{{.Title}}
+</title>
+<style>
+	/* Center everything on the page cleanly without a card frame */
+	body {
+		font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+		background-color: #f4f7f6;
+		color: #333;
+		margin: 0;
+		padding: 40px 20px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-height: 100vh;
+		text-align: center;
+		box-sizing: border-box;
+	}
+	/* Content wrapper to limit width neatly */
+	.content-container {
+		max-width: 500px;
+		width: 100%;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	/* Styling for the image placed at the top */
+	.app-image {
+		max-width: 100%;
+		height: auto;
+		border-radius: 12px;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+		display: block;
+		margin: 0 auto 20px auto;
+	}
+	.no-image {
+		color: #999;
+		font-style: italic;
+		margin-bottom: 20px;
+	}
+	h1 {
+		margin-top: 0;
+		margin-bottom: 10px;
+		font-size: 2.5rem;
+		color: #1a1a1a;
+	}
+	/* Message placement */
+	.message {
+		margin-top: 0;
+		margin-bottom: 30px;
+		font-size: 1.1rem;
+		color: #666;
+		line-height: 1.5;
+	}
+	/* Todo Form Styles */
+	.todo-form {
+		display: flex;
+		gap: 10px;
+		width: 100%;
+		margin-bottom: 30px;
+	}
+	.todo-input {
+		flex: 1;
+		padding: 12px 16px;
+		font-size: 1rem;
+		border: 1px solid #ccc;
+		border-radius: 8px;
+		outline: none;
+		transition: border-color 0.2s;
+	}
+	.todo-input:focus {
+		border-color: #0070f3;
+	}
+	.todo-btn {
+		padding: 12px 24px;
+		font-size: 1rem;
+		font-weight: 600;
+		background-color: #0070f3;
+		color: white;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s;
+	}
+	.todo-btn:hover {
+		background-color: #0051b3;
+	}
+	/* Todo List Styles */
+	.todo-list {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 40px 0;
+		width: 100%;
+		text-align: left;
+	}
+	.todo-item {
+		background: #ffffff;
+		padding: 14px 18px;
+		border-radius: 8px;
+		margin-bottom: 10px;
+		box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+		border-left: 4px solid #0070f3;
+		font-size: 1rem;
+		word-break: break-word;
+	}
+	footer {
+		margin-top: auto;
+		color: #666;
+	}
+</style>
+</head>
+<body>
+<div class="content-container">
+	<h1>
+		{{.Title}}
+	</h1>
+
+	{{if .Image}}
+		<img src="{{.Image}}" alt="Dynamic App Image" class="app-image">
+	{{else}}
+		<p class="no-image">
+			No image available.
+		</p>
+	{{end}}
+
+	<p class="message">
+		{{.Message}}
+	</p>
+
+	<form class="todo-form" id="taskForm" data-url="{{ .BackendURL }}">
+		<input type="text" name="title" id="taskTitle" class="todo-input" placeholder="What needs to be done? (max 140 characters)" maxlength="140" required >
+		<button type="submit" class="todo-btn">
+			Add Task
+		</button>
+	</form>
+
+	<ul class="todo-list">
+	  {{range .Tasks}}
+			<li class="todo-item">
+				{{Print .}}
+			</li>
+		{{end}}
+	</ul>
+
+	<footer>
+	  <strong>DevOps with Kubernetes 2026</strong>
+	</footer>
+</div>
+
+<script src='/static/js/main.js' type='text/javascript'></script>
+</body>
+</html>

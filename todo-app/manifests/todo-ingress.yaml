@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: todo-app-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-frontend-svc
+                port:
+                  number: 1234 # Routes web pages, css, and JS assets
+
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: todo-backend-svc
+                port:
+                  number: 80 # Routes database interaction data API calls

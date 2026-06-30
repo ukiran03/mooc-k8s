@@ -21,3 +21,4 @@
 **** Chapter 3: More building blocks
 ***** Networking between pods
 - [[https://github.com/ukiran03/mooc-k8s/tree/2.1/log-output-ping-pong][2.1.]] Connecting pods
+- [[https://github.com/ukiran03/mooc-k8s/tree/2.2/todo-app][2.2.]] The project, step 8 (extended with Database PV)

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-frontend-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-frontend
+  template:
+    metadata:
+      labels:
+        app: todo-frontend
+    spec:
+      securityContext:
+        fsGroup: 1000 # Standard GID for alpine appuser
+      volumes:
+        - name: todo-frontend-vol
+          persistentVolumeClaim:
+            claimName: todo-frontend-pvc
+      containers:
+        - name: todo-frontend
+          image: ushakiran369/todo-frontend:2.2.03
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            - name: PORT
+              value: "3000"
+            - name: BACKEND_URL
+              # Since Backend Service is on port 80, we don't need to specify :port
+              value: "http://todo-backend-svc"
+          volumeMounts:
+            - name: todo-frontend-vol
+              mountPath: /app/images

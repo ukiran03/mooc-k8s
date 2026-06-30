@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todo-backend-svc  # 1. This is the DNS name
+spec:
+  selector:
+    app: todo-backend
+  ports:
+    - port: 80            # 2. Exposed internally on port 80 (standard HTTP)
+      targetPort: 3001    # 3. Maps to backend container port 3001
