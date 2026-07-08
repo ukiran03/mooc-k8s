@@ -17,14 +17,16 @@ var (
 )
 
 type LogEnt struct {
-	timestamp string
-	randStr   string
-	pingCount int
+	Timestamp   string
+	RandStr     string
+	PingCount   int
+	Message     string
+	FileContent string
 }
 
 func (l LogEnt) String() string {
-	return fmt.Sprintf("%s %s\n Ping / Pongs: %d\n",
-		l.timestamp, l.randStr, l.pingCount)
+	return fmt.Sprintf("%s\n%s\n%s %s\n Ping / Pongs: %d\n",
+		l.Message, l.FileContent, l.Timestamp, l.RandStr, l.PingCount)
 }
 
 func randomString() string {
@@ -34,6 +36,11 @@ func randomString() string {
 	}
 	return hex.EncodeToString(b)
 }
+
+var (
+	message     string
+	fileContent string
+)
 
 func init() {
 	pingPort = os.Getenv("PING_PORT")
@@ -46,6 +53,23 @@ func init() {
 	if logPort == "" {
 		fmt.Println("env PORT was unset\nUsing Port 3000 as logPort")
 		logPort = "3000"
+	}
+
+	// Exercise 2.5
+	message = os.Getenv("MESSAGE")
+	if message == "" {
+		log.Print("env MESSAGE was unset")
+	}
+
+	f := os.Getenv("INFO_FILE")
+	if f == "" {
+		log.Print("env INFO_FILE was unset")
+	} else {
+		data, err := os.ReadFile(f)
+		if err != nil {
+			log.Printf("Read INFO_FILE Error: %v", err)
+		}
+		fileContent = string(data)
 	}
 }
 
@@ -81,9 +105,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entry := LogEnt{
-		timestamp: time.Now().Format("2006-01-02 15:04:05"),
-		randStr:   randomString(),
-		pingCount: pongCount,
+		Timestamp:   time.Now().Format("2006-01-02 15:04:05"),
+		RandStr:     randomString(),
+		PingCount:   pongCount,
+		Message:     message,
+		FileContent: fileContent,
 	}
 	fmt.Fprint(w, entry)
 }

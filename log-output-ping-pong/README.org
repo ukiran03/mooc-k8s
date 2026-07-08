@@ -1,4 +1,4 @@
-** 2.1. Connecting pods
+** 2.5. Documentation and ConfigMaps
 
 #+begin_src bash
 
@@ -7,41 +7,14 @@ kubectl apply -f manifests/
 
 # The log-output app
 $ curlie localhost:8081/log
-2026-01-16 07:37:05 f931b72a
-Ping / Pongs: 8
+Hello from the ConfigMap env!
+This is the content of the file from ConfigMap.
+
+2026-07-08 05:36:18 65eb5041
+ Ping / Pongs: 5
 
 # The ping-pong app
 $ curlie localhost:8081/pingpong
-ping 9
+ping 5
 
 #+end_src
-
-#+begin_example
-[ External User / Browser ]
-[ Outside Pod (Other Apps) ]
-        │
-        │
-        ▼
-┌────────────────────────────────────-──┐
-│       pong-log-ingress (Ingress)      │
-└──────────────────┬──────────────────-─┘
-                   │
-                   ▼
-┌──────────────────────────────────────┐
-│         pong-log-svc (Service)       │ (ClusterIP)
-└──────────────────┬───────────────────┘
-                   │
-                   ▼ (Routes traffic into the Pod)
-┌─────────────────────────────────────-┐
-│        Pod: pong-log-dep-...         │
-│                                      │
-│  ┌──────────────┐   localhost:3001   │
-│  │  log-output  │ ────────────────► │
-│  │ (Port 3000)  │ ◄──────────────── │
-│  └──────────────┘                    │
-│                     ┌─────────────┐  │
-│                     │  ping-pong  │  │
-│                     │ (Port 3001) │  │
-│                     └─────────────┘  │
-└─────────────────────────────────────-┘
-#+end_example

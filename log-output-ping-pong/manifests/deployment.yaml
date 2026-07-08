@@ -15,14 +15,29 @@ spec:
     spec:
       containers:
         - name: log-output
-          image: ushakiran369/log-output:2.1.v2
+          image: ushakiran369/log-output:2.5.v3
           env:
             - name: PORT
               value: "3000"
             - name: PING_PORT   # request pings on port
               value: "3001"
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-pong-config
+                  key: MESSAGE
+            - name: INFO_FILE
+              value: /usr/share/app/config/information.txt
+          volumeMounts:
+            - name: config-vol
+              mountPath: /usr/share/app/config
+              readOnly: true
         - name: ping-pong
           image: ushakiran369/ping-pong:2.1.v2
           env:
             - name: PING_PORT   # serve pings on port
               value: "3001"
+      volumes:
+        - name: config-vol
+          configMap:
+            name: log-pong-config
