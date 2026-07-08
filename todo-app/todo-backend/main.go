@@ -22,7 +22,7 @@ type backend struct {
 }
 
 func main() {
-	port := os.Getenv("PORT")
+	port := os.Getenv("BACKEND_PORT")
 	if port == "" {
 		fmt.Println("env PORT was unset\nUsing Port 3001 as Backend port")
 		port = "3001"

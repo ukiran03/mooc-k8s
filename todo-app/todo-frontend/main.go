@@ -58,7 +58,7 @@ func main() {
 
 	log.Printf("[DEBUG] Server dynamically configured backend target to: %s", backendURL)
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("FRONTEND_PORT")
 	if port == "" {
 		port = "3000"
 	}

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: todo-backend-pvc
+  namespace: project
 spec:
   storageClassName: mooc-pv     # Looks for a PV with this class
   volumeName: todo-backend-pv   # Explicitly forces binding to backend PV

@@ -1,4 +1,4 @@
-*** 2.2. The project, step 8
+*** 2.6. The project, step 10
 
 #+begin_src bash
 
@@ -6,19 +6,7 @@
 docker exec -it k3d-k3s-default-agent-0 mkdir -p /tmp/kube/frontend /tmp/kube/backend
 
 ## Apply manifests
-
-# 1. Apply Storage Components first
-kubectl apply -f todo-frontend-pv.yaml -f todo-backend-pv.yaml
-kubectl apply -f todo-frontend-pvc.yaml -f todo-backend-pvc.yaml
-
-# 2. Apply Network Services next
-kubectl apply -f todo-frontend-svc.yaml -f todo-backend-svc.yaml
-
-# 3. Apply Ingress
-kubectl apply -f todo-ingress.yaml
-
-# 4. Apply the Applications Deployments
-kubectl apply -f todo-frontend-dep.yaml -f todo-backend-dep.yaml
+kubectl apply -f manifests/
 
 # Access via load balancer
 curl http://localhost:8081/

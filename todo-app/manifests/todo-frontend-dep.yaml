@@ -21,16 +21,21 @@ spec:
             claimName: todo-frontend-pvc
       containers:
         - name: todo-frontend
-          image: ushakiran369/todo-frontend:2.2.03
+          image: ushakiran369/todo-frontend:2.6
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
           env:
-            - name: PORT
-              value: "3000"
+            - name: FRONTEND_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: FRONTEND_PORT
             - name: BACKEND_URL
-              # Since Backend Service is on port 80, we don't need to specify :port
-              value: "http://todo-backend-svc"
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: BACKEND_URL
           volumeMounts:
             - name: todo-frontend-vol
               mountPath: /app/images

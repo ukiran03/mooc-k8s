@@ -4,6 +4,9 @@ metadata:
   name: todo-frontend-pv
 spec:
   storageClassName: mooc-pv
+  claimRef:
+    namespace: project
+    name: todo-frontend-pvc
   capacity:
     storage: 1Gi
   volumeMode: Filesystem

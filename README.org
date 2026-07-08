@@ -27,3 +27,4 @@
 - [[https://github.com/ukiran03/mooc-k8s/tree/2.4/todo-app][2.4.]] The project, step 9
 ***** Configuring applications
 - [[https://github.com/ukiran03/mooc-k8s/tree/2.5/log-output-ping-pong][2.5.]] Documentation and ConfigMaps
+- [[https://github.com/ukiran03/mooc-k8s/tree/2.6/todo-app][2.6.]] The project, step 10
