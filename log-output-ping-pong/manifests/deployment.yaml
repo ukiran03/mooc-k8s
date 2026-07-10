@@ -15,9 +15,9 @@ spec:
     spec:
       containers:
         - name: log-output
-          image: ushakiran369/log-output:2.5.v3
+          image: ushakiran369/log-output:2.7
           env:
-            - name: PORT
+            - name: LOG_PORT
               value: "3000"
             - name: PING_PORT   # request pings on port
               value: "3001"
@@ -33,10 +33,31 @@ spec:
               mountPath: /usr/share/app/config
               readOnly: true
         - name: ping-pong
-          image: ushakiran369/ping-pong:2.1.v2
+          image: ushakiran369/ping-pong:2.7
           env:
             - name: PING_PORT   # serve pings on port
               value: "3001"
+            # Point to Headless Service name
+            - name: DB_HOST
+              value: "postgres-svc"
+            - name: DB_PORT
+              value: "5432"
+            # Map Secret keys
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-creds
+                  key: username
+            - name: DB_PASSWD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-creds
+                  key: password
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-creds
+                  key: dbname
       volumes:
         - name: config-vol
           configMap:
