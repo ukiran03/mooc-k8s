@@ -21,7 +21,7 @@ spec:
             claimName: todo-frontend-pvc
       containers:
         - name: todo-frontend
-          image: ushakiran369/todo-frontend:2.6
+          image: ushakiran369/todo-frontend:2.8
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

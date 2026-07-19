@@ -1,4 +1,4 @@
-*** 2.6. The project, step 10
+*** 2.8. The project, step 11
 
 #+begin_src bash
 
@@ -18,7 +18,7 @@ curl http://localhost:8081/
 #+ATTR_HTML: :width 100
 [[./assets/flow.excalidraw.png]]
 
-#+CAPTION: Demo from exercise 2.2
+#+CAPTION: Demo from exercise 2.8
 #+NAME: fig:demo-images
 #+ATTR_HTML: :width 150
 [[./assets/demo1.jpg]]

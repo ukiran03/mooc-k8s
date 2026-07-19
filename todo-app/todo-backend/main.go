@@ -1,20 +1,15 @@
 package main
 
 import (
-	"database/sql"
 	_ "embed"
 	"fmt"
 	"log"
 	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
 
-	_ "modernc.org/sqlite"
+	_ "github.com/lib/pq"
 )
-
-//go:embed schema.sql
-var schemaSQL string
 
 type backend struct {
 	tasks  *TaskModel
@@ -28,12 +23,17 @@ func main() {
 		port = "3001"
 	}
 
-	db, err := initDB()
+	db, err := openDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("Database forcefully reset to demo state.")
 	defer db.Close()
+
+	err = initialseTable(db)
+	if err != nil {
+		log.Printf("Error initialseTable: %v", err)
+		return
+	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -72,47 +72,4 @@ func (b *backend) enableCORS(next http.Handler) http.Handler {
 		// Pass the request to the mux (where it will match GET or POST)
 		next.ServeHTTP(w, r)
 	})
-}
-
-func initDB() (*sql.DB, error) {
-	dbDir := os.Getenv("DATABASE_DIR")
-	if dbDir == "" {
-		log.Printf("env DATABASE_DIR is unset")
-		dbDir = "."
-	}
-
-	// Ensure the directory exists (crucial for K8s volumes)
-	if err := os.MkdirAll(dbDir, 0o755); err != nil {
-		return nil, err
-	}
-
-	dbPath := filepath.Join(dbDir, "tasks.sqlite3")
-
-	db, err := sql.Open("sqlite", dbPath)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		db.Close()
-		return nil, err
-	}
-
-	// // Split the schema by semicolon and execute each statement sequentially
-	// queries := strings.Split(schemaSQL, ";")
-	// for _, query := range queries {
-	// 	query = strings.TrimSpace(query)
-	// 	if query == "" {
-	// 		continue
-	// 	}
-
-	// }
-
-	if _, err := db.Exec(schemaSQL); err != nil {
-		db.Close()
-		return nil, err
-	}
-
-	return db, nil
 }

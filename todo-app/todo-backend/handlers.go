@@ -30,10 +30,14 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 
 	switch length := utf8.RuneCountInString(t.Title); {
 	case length == 0:
-		app.serverError(w, r, fmt.Errorf("Title cannot be empty"))
+		app.serverError(w, r, fmt.Errorf("title cannot be empty"))
 		return
 	case length > 100:
-		app.serverError(w, r, fmt.Errorf("Title is too long (maximum 100 characters)"))
+		app.serverError(
+			w,
+			r,
+			fmt.Errorf("title is too long (maximum 100 characters)"),
+		)
 		return
 	}
 	_, err := app.tasks.Insert(t.Title, t.State)
@@ -43,7 +47,11 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *backend) readJSON(w http.ResponseWriter, r *http.Request, dst any) error {
+func (app *backend) readJSON(
+	w http.ResponseWriter,
+	r *http.Request,
+	dst any,
+) error {
 	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields() // Disallow unknown fields
@@ -65,7 +73,11 @@ func (app *backend) writeJSON(w http.ResponseWriter, status int, v any) {
 	}
 }
 
-func (app *backend) serverError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *backend) serverError(
+	w http.ResponseWriter,
+	r *http.Request,
+	err error,
+) {
 	var (
 		method = r.Method
 		uri    = r.URL.RequestURI()

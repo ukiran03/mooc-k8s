@@ -5,6 +5,8 @@ metadata:
   namespace: project
 data:
   BACKEND_PORT: "3001"
-  DATABASE_DIR: "/app/data"
   FRONTEND_PORT: "3000"
   BACKEND_URL: "http://todo-backend-svc"
+  DATABASE_DIR: "/app/data"     # remove
+  DB_HOST: "postgres-todo-svc"
+  DB_PORT: "5432"

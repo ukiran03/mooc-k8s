@@ -51,20 +51,18 @@ func (m *TaskModel) GetTasks() ([]Task, error) {
 }
 
 func (m *TaskModel) Insert(title string, state TaskState) (int, error) {
-	stmt := `INSERT INTO tasks (title, state) VALUES (?, ?)`
-	result, err := m.DB.Exec(stmt, title, state)
+	stmt := `INSERT INTO tasks (title, state) VALUES ($1, $2) RETURNING id`
+
+	var id int
+	err := m.DB.QueryRow(stmt, title, state).Scan(&id)
 	if err != nil {
 		return 0, err
 	}
-	id, err := result.LastInsertId()
-	if err != nil {
-		return 0, err
-	}
-	return int(id), nil
+	return id, nil
 }
 
 func (m *TaskModel) Update(id int, state TaskState) error {
-	stmt := `UPDATE tasks SET state = ?, where id = ?`
+	stmt := `UPDATE tasks SET state = $1 WHERE id = $2`
 	result, err := m.DB.Exec(stmt, state, id)
 	if err != nil {
 		return err
@@ -82,7 +80,7 @@ func (m *TaskModel) Update(id int, state TaskState) error {
 }
 
 func (m *TaskModel) Delete(id int) error {
-	stmt := `DELETE FROM tasks WHERE id = ?`
+	stmt := `DELETE FROM tasks WHERE id = $1`
 	result, err := m.DB.Exec(stmt, id)
 	if err != nil {
 		return err
