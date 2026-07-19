@@ -1,9 +1,6 @@
-*** 2.8. The project, step 11
+*** 2.9 The project, step 12
 
 #+begin_src bash
-
-# IMPORTANT
-docker exec -it k3d-k3s-default-agent-0 mkdir -p /tmp/kube/frontend /tmp/kube/backend
 
 ## Apply manifests
 kubectl apply -f manifests/
@@ -13,13 +10,22 @@ curl http://localhost:8081/
 
 #+end_src
 
-#+CAPTION: Todo App Flow
-#+NAME: fig:todo-app-flow
-#+ATTR_HTML: :width 100
-[[./assets/flow.excalidraw.png]]
+#+begin_src bash
+# Testing
 
-#+CAPTION: Demo from exercise 2.8
-#+NAME: fig:demo-images
-#+ATTR_HTML: :width 150
-[[./assets/demo1.jpg]]
-[[./assets/demo2.jpg]]
+## spin-off a temporary job for creating random wiki todo
+$ kubectl create job --from=cronjob/wiki-todo-gen wiki-todo-gen-test -n project
+job.batch/wiki-todo-gen-test created
+
+$ kubectl get pods -n project -w
+NAME                                 READY   STATUS      RESTARTS   AGE
+postgres-todo-stset-0                1/1     Running     0          7m33s
+todo-backend-dep-5c5d4c5db5-lcfln    1/1     Running     0          7m33s
+todo-frontend-dep-6f9cf9689f-mrfx7   1/1     Running     0          7m33s
+wiki-todo-gen-test-vg89v             0/1     Completed   0          14s # Job completed, successfully added URL as TODO
+
+## Delete the temporary job
+$ kubectl delete job wiki-todo-gen-test -n project
+job.batch "wiki-todo-gen-test" deleted from project namespace
+
+#+end_src

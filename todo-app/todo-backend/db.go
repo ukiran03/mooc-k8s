@@ -19,7 +19,7 @@ func loadConfig() (*Config, error) {
 	dbName := os.Getenv("DB_NAME")
 
 	if host == "" {
-		host = "postgres-svc"
+		host = "postgres-todo-svc"
 	}
 	if port == "" {
 		port = "5432"

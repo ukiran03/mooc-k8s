@@ -31,3 +31,4 @@
 ***** StatefulSets and Jobs
 - [[https://github.com/ukiran03/mooc-k8s/tree/2.7/log-output-ping-pong][2.7.]] Stateful applications
 - [[https://github.com/ukiran03/mooc-k8s/tree/2.8/todo-app][2.8.]] The project, step 11
+- [[https://github.com/ukiran03/mooc-k8s/tree/2.9/todo-app][2.9.]] The project, step 12
