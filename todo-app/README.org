@@ -1,4 +1,4 @@
-*** 2.9 The project, step 12
+*** 2.10 The project, step 13
 
 #+begin_src bash
 
@@ -10,22 +10,37 @@ curl http://localhost:8081/
 
 #+end_src
 
-#+begin_src bash
-# Testing
+#+begin_src
+$ cd manifests/monitoring
 
-## spin-off a temporary job for creating random wiki todo
-$ kubectl create job --from=cronjob/wiki-todo-gen wiki-todo-gen-test -n project
-job.batch/wiki-todo-gen-test created
+$ helm upgrade --install prom prometheus-community/prometheus \
+  --namespace project \
+  --create-namespace \
+  --values prom-values.yaml
 
-$ kubectl get pods -n project -w
-NAME                                 READY   STATUS      RESTARTS   AGE
-postgres-todo-stset-0                1/1     Running     0          7m33s
-todo-backend-dep-5c5d4c5db5-lcfln    1/1     Running     0          7m33s
-todo-frontend-dep-6f9cf9689f-mrfx7   1/1     Running     0          7m33s
-wiki-todo-gen-test-vg89v             0/1     Completed   0          14s # Job completed, successfully added URL as TODO
+helm upgrade --install loki grafana/loki \
+  --namespace project \
+  --values loki-values.yaml
 
-## Delete the temporary job
-$ kubectl delete job wiki-todo-gen-test -n project
-job.batch "wiki-todo-gen-test" deleted from project namespace
+helm upgrade --install k8smon grafana/k8s-monitoring \
+  --namespace project \
+  --values k8smon-values.yaml
+
+helm upgrade --install grafana grafana/grafana \
+  --namespace project \
+  --values grafana-values.yaml
+
+$ helm list --namespace project
+kubectl get svc --namespace project
+kubectl get pods --namespace project
+
+$ kubectl port-forward --namespace project svc/grafana 3000:80
 
 #+end_src
+
+#+CAPTION: Logging from exercise 2.10
+#+NAME: fig:demo-images
+#+ATTR_HTML: :width 150
+[[./assets/logging.jpg]]
+
+**** TODO Unable see logs in Grafana/Loki dashboard, Revisit this.

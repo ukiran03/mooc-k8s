@@ -43,7 +43,7 @@ func main() {
 	}
 
 	addr := ":" + port
-	log.Printf("Backend Server started on port %s", port)
+	logger.Info("Starting Todo-App Backend", "address", addr)
 	log.Fatal(http.ListenAndServe(addr, app.routes()))
 }
 

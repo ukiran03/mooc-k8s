@@ -24,6 +24,7 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 	}
 	var t Task
 	if err := app.readJSON(w, r, &t); err != nil {
+		app.logger.Error("failed to decode task JSON", "error", err)
 		http.Error(w, "invalid JSON: "+err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -31,6 +32,7 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 	switch length := utf8.RuneCountInString(t.Title); {
 	case length == 0:
 		app.serverError(w, r, fmt.Errorf("title cannot be empty"))
+		app.logger.Error("title cannot be empty", "length", length)
 		return
 	case length > 100:
 		app.serverError(
@@ -38,13 +40,26 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 			r,
 			fmt.Errorf("title is too long (maximum 100 characters)"),
 		)
+		app.logger.Error(
+			"title is too long (maximum 100 characters)",
+			"length",
+			length,
+		)
 		return
 	}
-	_, err := app.tasks.Insert(t.Title, t.State)
+
+	id, err := app.tasks.Insert(t.Title, t.State)
 	if err != nil {
+		app.logger.Error("database insertion failed",
+			"error", err,
+			"title", t.Title,
+		)
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.logger.Info("task created successfully", "id", id)
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (app *backend) readJSON(

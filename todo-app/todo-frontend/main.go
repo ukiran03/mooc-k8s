@@ -27,7 +27,7 @@ const (
 	imageURL = "https://placeholdpicsum.dev/photo/category/nature/250/250"
 
 	pageTitle   = "Todo App"
-	pageMessage = "This is from Exercise: 2.2"
+	pageMessage = "This is from Exercise: 2.10"
 )
 
 var (
@@ -56,7 +56,10 @@ func main() {
 	backendEnvUrl = strings.TrimSuffix(backendEnvUrl, "/")
 	backendURL = backendEnvUrl + backendRoute
 
-	log.Printf("[DEBUG] Server dynamically configured backend target to: %s", backendURL)
+	log.Printf(
+		"[DEBUG] Server dynamically configured backend target to: %s",
+		backendURL,
+	)
 
 	port := os.Getenv("FRONTEND_PORT")
 	if port == "" {
@@ -103,7 +106,9 @@ func (app *frontend) homeHandler(w http.ResponseWriter, r *http.Request) {
 	isCached, img := GetImage(currentImage)
 	log.Printf("Image requested, Cache hit: %t, File: %s", isCached, img.name)
 
-	tasks, err := fetchTasksFromBackend(backendURL) // this call is done via the cluster
+	tasks, err := fetchTasksFromBackend(
+		backendURL,
+	) // this call is done via the cluster
 	if err != nil {
 		app.backendError(w, r, err)
 		return
@@ -126,7 +131,11 @@ func (app *frontend) homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *frontend) backendError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *frontend) backendError(
+	w http.ResponseWriter,
+	r *http.Request,
+	err error,
+) {
 	var (
 		method   = r.Method
 		uri      = r.URL.RequestURI()
@@ -136,7 +145,11 @@ func (app *frontend) backendError(w http.ResponseWriter, r *http.Request, err er
 	http.Error(w, errorMsg, http.StatusInternalServerError)
 }
 
-func (app *frontend) serverError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *frontend) serverError(
+	w http.ResponseWriter,
+	r *http.Request,
+	err error,
+) {
 	var (
 		method = r.Method
 		uri    = r.URL.RequestURI()
