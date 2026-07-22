@@ -1,0 +1,17 @@
+*** 3.1. Pingpong GKE
+
+#+begin_src bash
+$ kubectl apply -f manifests
+
+~/prog/mooc-k8s/ping-pong on  main [?] (k8s gke_dwk-gke-503114_asia-south1-a_dwk-cluster:)
+$ kubectl get svc
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP    PORT(S)        AGE
+kubernetes      ClusterIP      34.118.224.1     <none>         443/TCP        24m
+ping-pong-svc   LoadBalancer   34.118.227.159   34.93.220.93   80:30090/TCP   5m35s
+
+
+~/prog/mooc-k8s/ping-pong on  main [?] (k8s gke_dwk-gke-503114_asia-south1-a_dwk-cluster:)
+$ curl http://34.93.220.93/pingpong
+ping 2%
+
+#+end_src
