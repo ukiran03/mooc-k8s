@@ -1,29 +1,63 @@
-** 2.7. Stateful applications
+** 3.2. Back to Ingress
 
 #+begin_src bash
-# begin, explicitly apply namespace (I think its a good practice)
-kubectl apply -f namespace.yaml
+# Create a new namespace "log-ping-gke"
+kubectl apply -f manifests/namespace.yaml
 
-# first, start postgres statefulset
-kubectl apply -f pg-secret.yaml
-kubectl apply -f pg-service.yaml
-kubectl apply -f pg-statefulset.yaml
+# First, start the Postgres StatefulSet
+kubectl apply -f manifests/pg-statefulset.yaml
 
-# finally, start the app
-kubectl apply -f configmap.yaml
-kubectl apply -f deployment.yaml
-kubectl apply -f ingress.yaml
-kubectl apply -f service.yaml
+# Finally, start the app and all remaining resources
+kubectl apply -f manifests/
 
-## Demo
-$ curl localhost:8081/pingpong
-ping 5
+# Check Ingress status (GCP L7 LB takes ~5-10 mins to provision)
+kubectl get ingress -n log-ping-gke --watch
+#+end_src
 
-$ curl localhost:8081/log
+#+begin_example
+NAME               CLASS    HOSTS   ADDRESS         PORTS   AGE
+pong-log-ingress   <none>   *       136.69.38.179   80      18m
+#+end_example
+
+*** Showcase
+
+#+begin_src bash
+$ curl http://136.69.38.179/log
 Hello from the ConfigMap env!
 This is the content of the file from ConfigMap.
 
-2026-07-10 11:54:14 b14e6173
- Ping / Pongs: 5
+2026-07-23 17:00:51 dfb9bd84
+ Ping / Pongs: 3
 
+$ curl http://136.69.38.179/pingpong
+ping 4
 #+end_src
+
+** Notes & Key Takeaways for GKE
+
+*** Container-Native Load Balancing (NEGs)
+Google Cloud Engine (GKE) requires an explicit opt-in for Container-Native Load
+Balancing on custom NodePort services to route traffic directly to Pod IPs via
+Network Endpoint Groups (NEGs). Without this, GKE uses legacy NodePort hops,
+which can cause connection resets (~curl: (52) Empty reply from server~).
+
+Add this annotation to ~service.yaml~:
+
+#+begin_src yaml
+metadata:
+  annotations:
+    # Enables Container-Native Load Balancing on GKE
+    cloud.google.com/neg: '{"ingress": true}'
+#+end_src
+
+*** Storage Class Compatibility
+- Local setups (~k3d~ / ~k3s~) default to ~local-path~ as the ~storageClassName~.
+- GKE defaults to ~standard-rwo~ (or ~standard~).
+- *Tip:* Omitting ~storageClassName~ or setting it to ~""~ in ~volumeClaimTemplates~
+  allows Kubernetes to automatically fallback to the default StorageClass of
+  whatever cluster it's deployed to.
+
+*** GKE Ingress Path Matching
+GKE's default ~gce~ Ingress requires explicit wildcard definitions for routes
+(~/log~ and ~/log/*~) using ~pathType: ImplementationSpecific~ to ensure subpaths and
+trailing slashes route smoothly without dropping traffic.
