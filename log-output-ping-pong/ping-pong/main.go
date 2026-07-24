@@ -60,7 +60,11 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("/{$}", app.homeHandler)
 	mux.HandleFunc("/health", app.healthcheckHandler)
 	mux.HandleFunc("/pings", app.getPings)
-	mux.HandleFunc("/pingpong", app.pingHandler)
+
+	// Accept both /pingpong and /pingpong/ for POST requests
+	mux.HandleFunc("POST /pingpong", app.pingHandler)
+	mux.HandleFunc("POST /pingpong/", app.pingHandler)
+
 	return mux
 }
 

@@ -1,30 +1,33 @@
-** 3.3 To the Gateway
+** 3.4. Rewritten Routing & Gateway API Setup
 
-Verify the Gateway deployment and external IP assignment:
+*** Verification & Output
 
+1. Verify the GKE Gateway status and extract the public IP:
 #+begin_src bash
 $ kubectl get gateway log-ping-gateway -n log-ping-gke
-NAME                CLASS                            ADDRESS          PROGRAMMED   AGE
-log-ping-gateway    gke-l7-global-external-managed   136.68.193.166   True         10m
+NAME               CLASS                            ADDRESS          PROGRAMMED   AGE
+log-ping-gateway   gke-l7-global-external-managed   136.68.193.166   True         16m
+
+$ EXTERNAL_IP=$(kubectl get gateway log-ping-gateway -n log-ping-gke -o jsonpath='{.status.addresses[0].value}')
 #+end_src
 
-Extract the Gateway's load balancer IP and test the routed endpoints:
-
+2. Test POST request to root (rewritten to =/pingpong= on port 3001):
 #+begin_src bash
-$ EXTERNAL_IP=$(kubectl get gateway log-ping-gateway -n log-ping-gke -o jsonpath='{.status.addresses[0].value}')
-
-$ curl -i http://$EXTERNAL_IP/pingpong
+$ curl -i -X POST http://$EXTERNAL_IP/ -d ""
 HTTP/1.1 200 OK
-date: Fri, 24 Jul 2026 08:54:42 GMT
+date: Fri, 24 Jul 2026 10:54:30 GMT
 Content-Length: 6
 content-type: text/plain; charset=utf-8
 via: 1.1 google
 
-ping 1%
+ping 1
+#+end_src
 
+3. Test GET request to =/log= (routed to port 3000):
+#+begin_src bash
 $ curl -i http://$EXTERNAL_IP/log
 HTTP/1.1 200 OK
-date: Fri, 24 Jul 2026 08:54:38 GMT
+date: Fri, 24 Jul 2026 10:54:41 GMT
 Content-Length: 125
 content-type: text/plain; charset=utf-8
 via: 1.1 google
@@ -32,28 +35,33 @@ via: 1.1 google
 Hello from the ConfigMap env!
 This is the content of the file from ConfigMap.
 
-2026-07-24 08:54:38 12f335f5
+2026-07-24 10:54:41 6de300bd
  Ping / Pongs: 1
 #+end_src
 
-*** Key Notes for Future Self
+---
 
-- Gateway API Rule Structure :: Always ensure each endpoint target in an
-  =HTTPRoute= is defined as a separate item in the =rules= array. Grouping multiple
-  =matches= or =backendRefs= under a single rule block causes silent routing
-  conflicts.
+*** Key Architecture Notes for Future Self
 
-- Path Forwarding vs. Rewriting :: By default, GKE Gateway forwards the exact
-  request path (e.g., =/log= or =/pingpong=) to the container. If the application
-  server expects traffic at the root path (=/=), you must explicitly configure a
-  =URLRewrite= filter in the =HTTPRoute= rule.
+**** 1. GKE Gateway API Constraints (=gke-l7-global-external-managed=)
+- *No Method Matching in HTTPRoute:* GKE's Gateway Controller raises error
+  =GWCER104= if you use =method: POST= inside =matches=. Method filtering must be
+  handled in the application layer (e.g., Go's =http.ServeMux=).
+- *Strict Matching Requirements for Rewrites:* Using =ReplacePrefixMatch= inside a
+  =URLRewrite= filter strictly requires the corresponding match type to be
+  =PathPrefix= (using =Exact= will cause validation errors).
 
-- GKE Load Balancer Health Checks :: GKE provisions separate GCP Backend
-  Services per target port. Ensure both apps expose an unauthenticated health
-  endpoint (e.g., =/health=) and attach a =HealthCheckPolicy= targeting the service
-  using =USE_SERVING_PORT=.
+**** 2. Go Router Trailing Slashes
+- Gateway API prefix rewrites (rewriting =/= to =/pingpong=) forward requests with
+  a trailing slash (=/pingpong/=) to the backend pod.
+- To prevent =404 page not found= errors from Go 1.22+ =ServeMux=, register both
+  trailing slash variants in your routes:
+  #+begin_src go
+  mux.HandleFunc("POST /pingpong", app.pingHandler)
+  mux.HandleFunc("POST /pingpong/", app.pingHandler)
+  #+end_src
 
-- Debugging "Empty reply from server" (curl error 52) :: If curl returns an
-  empty response immediately, check:
-  1. Are GCP health checks failing? (=kubectl describe httproute <name>=)
-  2. Is the container server listening on =0.0.0.0= instead of =127.0.0.1=?
+**** 3. GCP Load Balancer HTTP POST Requirements
+- GCP External Load Balancers return =411 Length Required= if a =POST= request is
+  sent without a body or content-length header.
+- When testing via =curl=, always pass an empty data payload using =-d ""=.
