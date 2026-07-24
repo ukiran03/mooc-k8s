@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: log-pong-config
+  name: log-ping-config
   namespace: log-ping-gke
 data:
   MESSAGE: "Hello from the ConfigMap env!"

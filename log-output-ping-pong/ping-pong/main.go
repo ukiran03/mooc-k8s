@@ -58,6 +58,7 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/{$}", app.homeHandler)
+	mux.HandleFunc("/health", app.healthcheckHandler)
 	mux.HandleFunc("/pings", app.getPings)
 	mux.HandleFunc("/pingpong", app.pingHandler)
 	return mux
@@ -65,6 +66,14 @@ func (app *application) routes() http.Handler {
 
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "visit /pingpong")
+}
+
+func (app *application) healthcheckHandler(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 func (app *application) getPings(w http.ResponseWriter, r *http.Request) {
@@ -162,7 +171,8 @@ func getDbDSN() (string, error) {
 	}
 	if user == "" || passwd == "" || dbName == "" {
 		return "", fmt.Errorf(
-			`missing required environment variables (DB_USER, DB_PASSWD, or DB_NAME)`)
+			`missing required environment variables (DB_USER, DB_PASSWD, or DB_NAME)`,
+		)
 	}
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",

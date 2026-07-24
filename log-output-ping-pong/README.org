@@ -1,63 +1,59 @@
-** 3.2. Back to Ingress
+** 3.3 To the Gateway
+
+Verify the Gateway deployment and external IP assignment:
 
 #+begin_src bash
-# Create a new namespace "log-ping-gke"
-kubectl apply -f manifests/namespace.yaml
-
-# First, start the Postgres StatefulSet
-kubectl apply -f manifests/pg-statefulset.yaml
-
-# Finally, start the app and all remaining resources
-kubectl apply -f manifests/
-
-# Check Ingress status (GCP L7 LB takes ~5-10 mins to provision)
-kubectl get ingress -n log-ping-gke --watch
+$ kubectl get gateway log-ping-gateway -n log-ping-gke
+NAME                CLASS                            ADDRESS          PROGRAMMED   AGE
+log-ping-gateway    gke-l7-global-external-managed   136.68.193.166   True         10m
 #+end_src
 
-#+begin_example
-NAME               CLASS    HOSTS   ADDRESS         PORTS   AGE
-pong-log-ingress   <none>   *       136.69.38.179   80      18m
-#+end_example
-
-*** Showcase
+Extract the Gateway's load balancer IP and test the routed endpoints:
 
 #+begin_src bash
-$ curl http://136.69.38.179/log
+$ EXTERNAL_IP=$(kubectl get gateway log-ping-gateway -n log-ping-gke -o jsonpath='{.status.addresses[0].value}')
+
+$ curl -i http://$EXTERNAL_IP/pingpong
+HTTP/1.1 200 OK
+date: Fri, 24 Jul 2026 08:54:42 GMT
+Content-Length: 6
+content-type: text/plain; charset=utf-8
+via: 1.1 google
+
+ping 1%
+
+$ curl -i http://$EXTERNAL_IP/log
+HTTP/1.1 200 OK
+date: Fri, 24 Jul 2026 08:54:38 GMT
+Content-Length: 125
+content-type: text/plain; charset=utf-8
+via: 1.1 google
+
 Hello from the ConfigMap env!
 This is the content of the file from ConfigMap.
 
-2026-07-23 17:00:51 dfb9bd84
- Ping / Pongs: 3
-
-$ curl http://136.69.38.179/pingpong
-ping 4
+2026-07-24 08:54:38 12f335f5
+ Ping / Pongs: 1
 #+end_src
 
-** Notes & Key Takeaways for GKE
+*** Key Notes for Future Self
 
-*** Container-Native Load Balancing (NEGs)
-Google Cloud Engine (GKE) requires an explicit opt-in for Container-Native Load
-Balancing on custom NodePort services to route traffic directly to Pod IPs via
-Network Endpoint Groups (NEGs). Without this, GKE uses legacy NodePort hops,
-which can cause connection resets (~curl: (52) Empty reply from server~).
+- Gateway API Rule Structure :: Always ensure each endpoint target in an
+  =HTTPRoute= is defined as a separate item in the =rules= array. Grouping multiple
+  =matches= or =backendRefs= under a single rule block causes silent routing
+  conflicts.
 
-Add this annotation to ~service.yaml~:
+- Path Forwarding vs. Rewriting :: By default, GKE Gateway forwards the exact
+  request path (e.g., =/log= or =/pingpong=) to the container. If the application
+  server expects traffic at the root path (=/=), you must explicitly configure a
+  =URLRewrite= filter in the =HTTPRoute= rule.
 
-#+begin_src yaml
-metadata:
-  annotations:
-    # Enables Container-Native Load Balancing on GKE
-    cloud.google.com/neg: '{"ingress": true}'
-#+end_src
+- GKE Load Balancer Health Checks :: GKE provisions separate GCP Backend
+  Services per target port. Ensure both apps expose an unauthenticated health
+  endpoint (e.g., =/health=) and attach a =HealthCheckPolicy= targeting the service
+  using =USE_SERVING_PORT=.
 
-*** Storage Class Compatibility
-- Local setups (~k3d~ / ~k3s~) default to ~local-path~ as the ~storageClassName~.
-- GKE defaults to ~standard-rwo~ (or ~standard~).
-- *Tip:* Omitting ~storageClassName~ or setting it to ~""~ in ~volumeClaimTemplates~
-  allows Kubernetes to automatically fallback to the default StorageClass of
-  whatever cluster it's deployed to.
-
-*** GKE Ingress Path Matching
-GKE's default ~gce~ Ingress requires explicit wildcard definitions for routes
-(~/log~ and ~/log/*~) using ~pathType: ImplementationSpecific~ to ensure subpaths and
-trailing slashes route smoothly without dropping traffic.
+- Debugging "Empty reply from server" (curl error 52) :: If curl returns an
+  empty response immediately, check:
+  1. Are GCP health checks failing? (=kubectl describe httproute <name>=)
+  2. Is the container server listening on =0.0.0.0= instead of =127.0.0.1=?

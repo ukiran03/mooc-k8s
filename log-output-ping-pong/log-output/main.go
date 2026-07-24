@@ -68,9 +68,13 @@ func main() {
 		fileContent = string(data)
 	}
 
-	http.HandleFunc("/", homeHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", homeHandler)
+	mux.HandleFunc("/health", healthcheckHandler)
+
 	log.Printf("Starting log server on port %s...", logPort)
-	if err := http.ListenAndServe(":"+logPort, nil); err != nil {
+
+	if err := http.ListenAndServe(":"+logPort, mux); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
 }
@@ -91,6 +95,11 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		fileContent: fileContent,
 	}
 	fmt.Fprint(w, entry)
+}
+
+func healthcheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 func fetchPingCount(pingPort string) (int, error) {

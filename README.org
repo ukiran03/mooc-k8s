@@ -1,3 +1,14 @@
+
+#+begin_quote
+*NOTE:* Earlier exercise submissions (prior to 3.3) linked directly to the
+release tag root, whereas submissions from 3.3 onwards link directly to the
+relevant exercise subfolder within that tag for faster reviewer navigation.
+
+- *Up to 3.2 (Submitted as Tag Root):* [[https://github.com/ukiran03/mooc-k8s/tree/3.2]]
+- *From 3.3+ (Submitted with Subfolder):* [[https://github.com/ukiran03/mooc-k8s/tree/3.3/XXX]]
+#+end_quote
+
+
 *** [[https://courses.mooc.fi/org/uh-cs/courses/devops-with-kubernetes-2026][MOOC]] Devops with Kubernetes' submissions
 
 **** Chapter 2: Kubernetes basics
@@ -39,3 +50,4 @@
 ***** Introduction to Google Kubernetes Engine
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.1/ping-pong][3.1.]] Pingpong GKE
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.2/log-output-ping-pong][3.2.]] Back to Ingress
+- [[https://github.com/ukiran03/mooc-k8s/tree/3.3/log-output-ping-pong][3.3.]] To the Gateway

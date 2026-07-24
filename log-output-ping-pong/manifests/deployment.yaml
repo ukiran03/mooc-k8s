@@ -2,16 +2,16 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: log-ping-gke
-  name: pong-log-dep
+  name: log-ping-dep
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: pong-log
+      app: log-ping
   template:
     metadata:
       labels:
-        app: pong-log
+        app: log-ping
     spec:
       containers:
         - name: log-output
@@ -24,7 +24,7 @@ spec:
             - name: MESSAGE
               valueFrom:
                 configMapKeyRef:
-                  name: log-pong-config
+                  name: log-ping-config
                   key: MESSAGE
             - name: INFO_FILE
               value: /usr/share/app/config/information.txt
@@ -61,4 +61,4 @@ spec:
       volumes:
         - name: config-vol
           configMap:
-            name: log-pong-config
+            name: log-ping-config

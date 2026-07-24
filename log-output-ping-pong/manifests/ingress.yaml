@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: pong-log-ingress
+  name: log-ping-ingress
   namespace: log-ping-gke
 spec:
   rules:
@@ -11,27 +11,27 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: pong-log-svc
+                name: log-ping-svc
                 port:
                   number: 3000
           - path: /log/*
             pathType: ImplementationSpecific
             backend:
               service:
-                name: pong-log-svc
+                name: log-ping-svc
                 port:
                   number: 3000
           - path: /pingpong
             pathType: ImplementationSpecific
             backend:
               service:
-                name: pong-log-svc
+                name: log-ping-svc
                 port:
                   number: 3001
           - path: /pingpong/*
             pathType: ImplementationSpecific
             backend:
               service:
-                name: pong-log-svc
+                name: log-ping-svc
                 port:
                   number: 3001

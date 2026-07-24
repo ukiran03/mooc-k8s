@@ -1,0 +1,43 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: log-ping-gateway
+  namespace: log-ping-gke
+spec:
+  gatewayClassName: gke-l7-global-external-managed
+  listeners:
+  - name: http
+    protocol: HTTP
+    port: 80
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute
+
+---
+
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: log-ping-route
+  namespace: log-ping-gke
+spec:
+  parentRefs:
+  - name: log-ping-gateway
+  rules:
+  # Rule 1: /log traffic -> port 3000
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /log
+    backendRefs:
+    - name: log-ping-svc
+      port: 3000
+
+  # Rule 2: /pingpong traffic -> port 3001
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /pingpong
+    backendRefs:
+    - name: log-ping-svc
+      port: 3001
