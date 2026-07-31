@@ -3,8 +3,10 @@ kind: Ingress
 metadata:
   name: todo-app-ingress
   namespace: project
+  annotations:
+    kubernetes.io/ingress.class: "gce"  # Forces the GKE controller to bind immediately
 spec:
-  ingressClassName: traefik
+  ingressClassName: gce
   rules:
     - http:
         paths:

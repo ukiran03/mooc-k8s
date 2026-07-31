@@ -1,46 +1,54 @@
-*** 2.10 The project, step 13
+*** 3.5 The project, step 14
 
-#+begin_src bash
+#+begin_src text
 
-## Apply manifests
-kubectl apply -f manifests/
+# Apply manifests
+kubectl apply -k .
 
-# Access via load balancer
-curl http://localhost:8081/
+# Get the External address
+$ kubectl get ingress -n project
+NAME               CLASS   HOSTS   ADDRESS         PORTS   AGE
+todo-app-ingress   gce     *       34.149.122.25   80      17m
 
-#+end_src
-
-#+begin_src
-$ cd manifests/monitoring
-
-$ helm upgrade --install prom prometheus-community/prometheus \
-  --namespace project \
-  --create-namespace \
-  --values prom-values.yaml
-
-helm upgrade --install loki grafana/loki \
-  --namespace project \
-  --values loki-values.yaml
-
-helm upgrade --install k8smon grafana/k8s-monitoring \
-  --namespace project \
-  --values k8smon-values.yaml
-
-helm upgrade --install grafana grafana/grafana \
-  --namespace project \
-  --values grafana-values.yaml
-
-$ helm list --namespace project
-kubectl get svc --namespace project
-kubectl get pods --namespace project
-
-$ kubectl port-forward --namespace project svc/grafana 3000:80
+$ EXTERNAL_IP=$(kubectl get ingress -n project -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}')
 
 #+end_src
 
-#+CAPTION: Logging from exercise 2.10
-#+NAME: fig:demo-images
-#+ATTR_HTML: :width 150
-[[./assets/logging.jpg]]
+**** Important Changes/Notes
+#+begin_src text
+remove: backend/pv.yaml & frontend/pv.yaml
 
-**** TODO Unable see logs in Grafana/Loki dashboard, Revisit this.
+Using kind: PersistentVolume with local paths (/tmp/kube/...) and hardcoded
+node affinities pointing to your old k3d agent (k3d-k3s-default-agent-0).
+
+GKE nodes are managed Google Compute Engine instances; we shouldn't manually
+create static local PVs or tie them to ephemeral node hostnames. If that node
+scales down or replaces, your data is lost.
+---
+
+refactor: {backend,frontend}/pvc.yaml (persistent-volume-claim)
+
+Change storageClassName to GKE's default managed storage class (standard-rwo)
+or delete the field to automatically use the cluster default.
+---
+
+refactor: ingress.yaml
+
+Update your Ingress manifest to use GKE's standard controller format
+---
+
+refactor: database/pg-statefulset.yaml
+
+Explicitly set the GKE storage class here too, so Google Cloud provisions a
+persistent disk (pd-balanced or pd-standard)
+---
+
+feat(todo-backend): add GET / healthcheck endpoint
+
+Google Compute Engine (GCE) requires a success status code (such as HTTP 200
+OK) for its health check probes. This endpoint satisfies those requirements,
+transitioning the backend status from UNHEALTHY to HEALTHY and ensuring smooth
+traffic flow from the Ingress to application pods.
+---
+
+#+end_src

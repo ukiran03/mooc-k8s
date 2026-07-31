@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: project
+
+# Cluster-wide or shared resources
+resources:
+  - manifests/app/namespace.yaml
+  - manifests/app/configmap.yaml
+  - manifests/app/ingress.yaml
+  - manifests/app/database/pg-statefulset.yaml
+  - manifests/app/backend/deployment.yaml
+  - manifests/app/backend/pvc.yaml
+  - manifests/app/backend/service.yaml
+  - manifests/app/frontend/deployment.yaml
+  - manifests/app/frontend/pvc.yaml
+  - manifests/app/frontend/service.yaml

@@ -4,8 +4,7 @@ metadata:
   name: todo-frontend-pvc
   namespace: project
 spec:
-  storageClassName: mooc-pv     # Looks for a PV with this class
-  volumeName: todo-frontend-pv  # Explicitly forces binding to this PV
+  storageClassName: standard-rwo
   accessModes:
     - ReadWriteOnce
   resources:

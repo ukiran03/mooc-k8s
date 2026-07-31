@@ -50,6 +50,12 @@ func main() {
 func (app *backend) routes() http.Handler {
 	mux := http.NewServeMux()
 
+	// Health check route for GCE Ingress
+	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	mux.HandleFunc("GET /api/tasks", app.getTasks)
 	mux.HandleFunc("POST /api/tasks", app.createTask)
 
