@@ -1,0 +1,85 @@
+name: Release Todo (project) application
+
+on:
+  push:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: dwk-cluster
+  GKE_ZONE: asia-south1-a
+  REGISTRY: asia-south1-docker.pkg.dev
+  REPOSITORY: uk-docker-repo
+  FRONTEND_IMAGE_NAME: todo-frontend
+  BACKEND_IMAGE_NAME: todo-backend
+  BRANCH: ${{ github.ref_name }}
+
+jobs:
+  build-publish-deploy:
+    name: Build, Publish and Deploy
+    runs-on: ubuntu-latest
+    environment: dwk-env-secrets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
+          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
+
+      - name: 'Setup Cloud SDK'
+        uses: google-github-actions/setup-gcloud@v3
+
+      - name: 'Use gcloud CLI'
+        run: gcloud info
+
+      - name: 'Gcloud authenticate'
+        run: gcloud --quiet auth configure-docker $REGISTRY
+
+      - name: 'Get GKE credentials'
+        uses: 'google-github-actions/get-gke-credentials@v3'
+        with:
+          cluster_name: '${{ env.GKE_CLUSTER }}'
+          project_id: '${{ env.PROJECT_ID }}'
+          location: '${{ env.GKE_ZONE }}'
+
+      # Frontend: Build & Publish
+      - name: Build and Publish Frontend Image
+        run: |
+          IMAGE_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$FRONTEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA
+          docker build -t $IMAGE_TAG ./todo-app/todo-frontend
+          docker push $IMAGE_TAG
+          echo "FRONTEND_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      # Backend: Build and Publish
+      - name: Build and Publish Backend Image
+        run: |
+          IMAGE_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$BACKEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA
+          docker build -t $IMAGE_TAG ./todo-app/todo-backend
+          docker push $IMAGE_TAG
+          echo "BACKEND_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy
+        run: |
+          # Move into the todo-app folder where kustomization.yaml lives
+          cd todo-app
+
+          # Update Kustomize image tags using the environment variable names
+          kustomize edit set image BACKEND_IMAGE=$BACKEND_IMAGE_TAG
+          kustomize edit set image FRONTEND_IMAGE=$FRONTEND_IMAGE_TAG
+
+          # Build and Apply the manifests
+          kustomize build . | kubectl apply -f -
+
+          # Wait for rollouts using your correct deployment names
+          kubectl rollout status deployment/todo-backend-dep -n project
+          kubectl rollout status deployment/todo-frontend-dep -n project
+
+          # View services in the project namespace
+          kubectl get services -n project -o wide
