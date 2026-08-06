@@ -70,16 +70,29 @@ jobs:
           # Navigate into the todo-app directory where kustomization.yaml lives
           cd ./todo-app
 
-          # Update Kustomize image tags using the correct syntax (old_image=new_image:tag)
+          # Determine the namespace: use 'project' for main, branch name otherwise
+          NAMESPACE="${GITHUB_REF#refs/heads/}"
+          if [ "$NAMESPACE" = "main" ]; then
+            NAMESPACE="project"
+          fi
+
+          # Create the namespace if it does not exist and set it as current
+          # context
+          kubectl create namespace "$NAMESPACE" || true
+          kubectl config set-context --current --namespace="$NAMESPACE"
+
+          # Update Kustomize namespace and image tags
+          kustomize edit set namespace "$NAMESPACE"
           kustomize edit set image BACKEND_IMAGE="$BACKEND_IMAGE_TAG"
           kustomize edit set image FRONTEND_IMAGE="$FRONTEND_IMAGE_TAG"
 
           # Build and Apply the manifests
           kustomize build . | kubectl apply -f -
 
-          # Wait for rollouts using your correct deployment names
-          kubectl rollout status deployment/todo-backend-dep -n project
-          kubectl rollout status deployment/todo-frontend-dep -n project
+          # Wait for rollouts using your correct deployment names in the
+          # dynamic namespace
+          kubectl rollout status deployment/todo-backend-dep -n "$NAMESPACE"
+          kubectl rollout status deployment/todo-frontend-dep -n "$NAMESPACE"
 
-          # View services in the project namespace
-          kubectl get services -n project -o wide
+          # View services in the target namespace
+          kubectl get services -n "$NAMESPACE" -o wide

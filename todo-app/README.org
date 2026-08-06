@@ -1,45 +1,40 @@
 *** Github workflow
 Link:  [[https://github.com/ukiran03/mooc-k8s/tree/3.6/.github/workflows/main.yaml][.github/workflows/main.yaml]]
 
-*** 3.6. The project, step 15
+*** 3.7. The project, step 16
 
-#+begin_src bash
+#+begin_src yaml
+# ...
+  - name: Deploy
+    run: |
+      # Navigate into the todo-app directory where kustomization.yaml lives
+      cd ./todo-app
 
-$ kubectl get ingress -n project
-NAME               CLASS   HOSTS   ADDRESS          PORTS   AGE
-todo-app-ingress   gce     *       136.68.199.101   80      36m
+      # Determine the namespace: use 'project' for main, branch name otherwise
+      NAMESPACE="${GITHUB_REF#refs/heads/}"
+      if [ "$NAMESPACE" = "main" ]; then
+        NAMESPACE="project"
+      fi
 
-$ kubectl get pods -n project
-NAME                                 READY   STATUS    RESTARTS      AGE
-postgres-todo-stset-0                1/1     Running   0             18m
-todo-backend-dep-74bb7c7c74-hdbss    1/1     Running   2 (18m ago)   18m
-todo-frontend-dep-74ffcf445f-c5wpz   1/1     Running   0             18m
+      # Create the namespace if it does not exist and set it as current
+      # context
+      kubectl create namespace "$NAMESPACE" || true
+      kubectl config set-context --current --namespace="$NAMESPACE"
 
-#+end_src
+      # Update Kustomize namespace and image tags
+      kustomize edit set namespace "$NAMESPACE"
+      kustomize edit set image BACKEND_IMAGE="$BACKEND_IMAGE_TAG"
+      kustomize edit set image FRONTEND_IMAGE="$FRONTEND_IMAGE_TAG"
 
-**** Gcloud
-#+begin_src bash
+      # Build and Apply the manifests
+      kustomize build . | kubectl apply -f -
 
-$ gcloud iam service-accounts list \
-  --filter="compute@developer.gserviceaccount.com" \
-  --format="value(email)" \
-  --project=dwk-gke-503114
+      # Wait for rollouts using your correct deployment names in the
+      # dynamic namespace
+      kubectl rollout status deployment/todo-backend-dep -n "$NAMESPACE"
+      kubectl rollout status deployment/todo-frontend-dep -n "$NAMESPACE"
 
-764540294746-compute@developer.gserviceaccount.com
-
-$ gcloud artifacts repositories add-iam-policy-binding uk-docker-repo \
-  --location=asia-south1 \
-  --member="serviceAccount:764540294746-compute@developer.gserviceaccount.com" \
-  --role="roles/artifactregistry.reader" \
-  --project=dwk-gke-503114
-
-Updated IAM policy for repository [uk-docker-repo].
-bindings:
-- members:
-  - serviceAccount:764540294746-compute@developer.gserviceaccount.com
-  - serviceAccount:github-actions-sa@dwk-gke-503114.iam.gserviceaccount.com
-  role: roles/artifactregistry.reader
-etag: BwZYYMaLgkE=
-version: 1
+      # View services in the target namespace
+      kubectl get services -n "$NAMESPACE" -o wide
 
 #+end_src
