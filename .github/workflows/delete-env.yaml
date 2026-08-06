@@ -1,9 +1,3 @@
-*** Github workflow
-File Link:  [[https://github.com/ukiran03/mooc-k8s/tree/3.8/.github/workflows/delete-env.yaml][.github/workflows/delete-env.yaml]]
-
-*** 3.8. The project, step 17
-
-#+begin_src yaml
 name: Delete Environment
 
 on:
@@ -42,4 +36,3 @@ jobs:
           NAMESPACE="${{ github.event.ref }}"
           echo "Deleting environment namespace: $NAMESPACE"
           kubectl delete namespace "$NAMESPACE" --ignore-not-found
-#+end_src
