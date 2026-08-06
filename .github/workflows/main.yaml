@@ -8,7 +8,7 @@ permissions:
   id-token: write
 
 env:
-  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  PROJECT_ID: ${{ secrets.GKE_PROJECT_ID }}
   GKE_CLUSTER: dwk-cluster
   GKE_ZONE: asia-south1-a
   REGISTRY: asia-south1-docker.pkg.dev
@@ -21,7 +21,7 @@ jobs:
   build-publish-deploy:
     name: Build, Publish and Deploy
     runs-on: ubuntu-latest
-    environment: dwk-env-secrets
+    environment: GKE_PROJECT
 
     steps:
       - name: Checkout
@@ -52,27 +52,27 @@ jobs:
       # Frontend: Build & Publish
       - name: Build and Publish Frontend Image
         run: |
-          IMAGE_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$FRONTEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA
-          docker build -t $IMAGE_TAG ./todo-app/todo-frontend
-          docker push $IMAGE_TAG
+          IMAGE_TAG="$REGISTRY/$PROJECT_ID/$REPOSITORY/$FRONTEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA"
+          docker buildx build --load -t "$IMAGE_TAG" -f ./todo-app/todo-frontend/Dockerfile ./todo-app/todo-frontend
+          docker push "$IMAGE_TAG"
           echo "FRONTEND_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       # Backend: Build and Publish
       - name: Build and Publish Backend Image
         run: |
-          IMAGE_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$BACKEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA
-          docker build -t $IMAGE_TAG ./todo-app/todo-backend
-          docker push $IMAGE_TAG
+          IMAGE_TAG="$REGISTRY/$PROJECT_ID/$REPOSITORY/$BACKEND_IMAGE_NAME:$BRANCH-$GITHUB_SHA"
+          docker buildx build --load -t "$IMAGE_TAG" -f ./todo-app/todo-backend/Dockerfile ./todo-app/todo-backend
+          docker push "$IMAGE_TAG"
           echo "BACKEND_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Deploy
         run: |
-          # Move into the todo-app folder where kustomization.yaml lives
-          cd todo-app
+          # Navigate into the todo-app directory where kustomization.yaml lives
+          cd ./todo-app
 
-          # Update Kustomize image tags using the environment variable names
-          kustomize edit set image BACKEND_IMAGE=$BACKEND_IMAGE_TAG
-          kustomize edit set image FRONTEND_IMAGE=$FRONTEND_IMAGE_TAG
+          # Update Kustomize image tags using the correct syntax (old_image=new_image:tag)
+          kustomize edit set image BACKEND_IMAGE="$BACKEND_IMAGE_TAG"
+          kustomize edit set image FRONTEND_IMAGE="$FRONTEND_IMAGE_TAG"
 
           # Build and Apply the manifests
           kustomize build . | kubectl apply -f -

@@ -18,8 +18,7 @@ WORKDIR /app
 RUN adduser -D appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Copy the binary and Image files from the builder
-COPY --from=builder --chown=appuser:appuser /frontend/images ./images
+# Copy only the binary (Go code will handle creating the images dir)
 COPY --from=builder --chown=appuser:appuser /frontend/todo-frontend .
 
 CMD ["./todo-frontend"]

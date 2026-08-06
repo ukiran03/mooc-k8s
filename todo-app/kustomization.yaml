@@ -4,16 +4,16 @@ namespace: project
 
 # Cluster-wide or shared resources
 resources:
-  - todo-app/manifests/app/namespace.yaml
-  - todo-app/manifests/app/configmap.yaml
-  - todo-app/manifests/app/ingress.yaml
-  - todo-app/manifests/app/database/pg-statefulset.yaml
-  - todo-app/manifests/app/backend/deployment.yaml
-  - todo-app/manifests/app/backend/pvc.yaml
-  - todo-app/manifests/app/backend/service.yaml
-  - todo-app/manifests/app/frontend/deployment.yaml
-  - todo-app/manifests/app/frontend/pvc.yaml
-  - todo-app/manifests/app/frontend/service.yaml
+  - manifests/app/namespace.yaml
+  - manifests/app/configmap.yaml
+  - manifests/app/ingress.yaml
+  - manifests/app/database/pg-statefulset.yaml
+  - manifests/app/backend/deployment.yaml
+  - manifests/app/backend/pvc.yaml
+  - manifests/app/backend/service.yaml
+  - manifests/app/frontend/deployment.yaml
+  - manifests/app/frontend/pvc.yaml
+  - manifests/app/frontend/service.yaml
 
 images:
   - name: BACKEND_IMAGE

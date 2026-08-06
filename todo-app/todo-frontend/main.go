@@ -48,6 +48,13 @@ type frontend struct {
 	templates *template.Template
 }
 
+func init() {
+	// Force create the images directory if it doesn't exist
+	if err := os.MkdirAll("./images", 0o755); err != nil {
+		log.Fatalf("error: could not create images directory: %v", err)
+	}
+}
+
 func main() {
 	backendEnvUrl := os.Getenv("BACKEND_URL")
 	if backendEnvUrl == "" {
