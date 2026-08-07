@@ -1,45 +1,20 @@
-*** Github workflow
-File Link:  [[https://github.com/ukiran03/mooc-k8s/tree/3.8/.github/workflows/delete-env.yaml][.github/workflows/delete-env.yaml]]
+*** 3.9. DBaaS vs DIY
+**** Initialization: Works & Costs
 
-*** 3.8. The project, step 17
+|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
+| Metric            | DBaaS                                                                | DIY(Self-Managed)                                                                                |
+|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
+| Setup Effort      | *Minimal*. Easy provisioning via web-console, CLI etc                  | *High*. Requires configuring OS parameters, installing engine binaries, hardening network security |
+| Upfront Cost      | *Low*. Pay-As-You-Go Subscription                                      | *High*. Requires purchasing hardware, data center space                                            |
+| Skillset Required | Basic cloud administration and understanding of database connections | Specialized Database Administrators (DBAs) and Systems Engineers                                 |
+|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
 
-#+begin_src yaml
-name: Delete Environment
+**** Ongoing Maintenance
 
-on:
-  delete:
-
-jobs:
-  delete-environment:
-    runs-on: ubuntu-latest
-
-    # Only run when a branch is deleted, and protect the 'main' branch/environment
-    if: github.event.ref_type == 'branch' && github.event.ref != 'main'
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      # Authenticate with Google Cloud (matches your main deployment workflow)
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: "${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}"
-          service_account: "${{ secrets.SERVICE_ACCOUNT }}"
-
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v3
-
-      - name: Get GKE credentials
-        uses: google-github-actions/get-gke-credentials@v3
-        with:
-          cluster_name: '${{ env.GKE_CLUSTER }}'
-          project_id: '${{ env.PROJECT_ID }}'
-          location: '${{ env.GKE_ZONE }}'
-
-      - name: Delete Kubernetes Namespace
-        run: |
-          NAMESPACE="${{ github.event.ref }}"
-          echo "Deleting environment namespace: $NAMESPACE"
-          kubectl delete namespace "$NAMESPACE" --ignore-not-found
-#+end_src
+|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| Feature             | DBaaS                                                              | DIY(Self-Managed)                                                                               |
+|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+| Patching & Upgrades | *Automated*. The provider rolls out security patches, minor versions | *Manual & Risky*. Our team must track CVEs, test patches in staging, and manually execute updates |
+| Scaling             | *Instant*. Scaling vertical or horizontal replicas                   | *Complex*. Requires resizing cloud instances manually                                             |
+| Monitoring          | Built-in dashboards                                                | We must deploy, configure, and maintain our own observability stack                             |
+|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|

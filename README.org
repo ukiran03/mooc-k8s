@@ -52,7 +52,10 @@ relevant exercise subfolder within that tag for faster reviewer navigation.
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.2/log-output-ping-pong][3.2.]] Back to Ingress
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.3/log-output-ping-pong][3.3.]] To the Gateway
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.4/log-output-ping-pong][3.4.]] Rewritten routing
+***** Deployment Pipeline
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.5/todo-app][3.5.]] The project, step 14
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.6/todo-app][3.6.]] The project, step 15
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.7/todo-app][3.7.]] The project, step 16
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.8/todo-app][3.8.]] The project, step 17
+***** GKE features
+- [[https://github.com/ukiran03/mooc-k8s/tree/3.9/todo-app][3.9.]] DBaaS vs DIY
