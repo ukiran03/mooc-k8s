@@ -24,7 +24,8 @@ const (
 	webImagePath = "/images/image.jpg"
 	imagePath    = "./images/image.jpg"
 
-	imageURL = "https://placeholdpicsum.dev/photo/category/nature/250/250"
+	// imageURL = "https://placeholdpicsum.dev/photo/category/nature/250/250"
+	imageURL = "https://picsum.photos/250/250"
 
 	pageTitle   = "Todo App"
 	pageMessage = "This is from Exercise: 2.10"

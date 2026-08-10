@@ -1,20 +1,60 @@
-*** 3.9. DBaaS vs DIY
-**** Initialization: Works & Costs
+*** 3.10. The project, step 18
 
-|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
-| Metric            | DBaaS                                                                | DIY(Self-Managed)                                                                                |
-|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
-| Setup Effort      | *Minimal*. Easy provisioning via web-console, CLI etc                  | *High*. Requires configuring OS parameters, installing engine binaries, hardening network security |
-| Upfront Cost      | *Low*. Pay-As-You-Go Subscription                                      | *High*. Requires purchasing hardware, data center space                                            |
-| Skillset Required | Basic cloud administration and understanding of database connections | Specialized Database Administrators (DBAs) and Systems Engineers                                 |
-|-------------------+----------------------------------------------------------------------+--------------------------------------------------------------------------------------------------|
+#+begin_src bash
+$ kubectl get pods -n project
+NAME                                 READY   STATUS    RESTARTS       AGE
+postgres-todo-stset-0                1/1     Running   0              2m17s
+todo-backend-dep-7478d8998c-bxzms    1/1     Running   3 (109s ago)   2m18s
+todo-frontend-dep-68fc8b8774-klmrw   1/1     Running   0              2m18s
+#+end_src
 
-**** Ongoing Maintenance
+#+begin_src bash
+$ kubectl get ingress -n project
+NAME               CLASS   HOSTS   ADDRESS       PORTS   AGE
+todo-app-ingress   gce     *       34.8.172.31   80      17m
+#+end_src
 
-|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
-| Feature             | DBaaS                                                              | DIY(Self-Managed)                                                                               |
-|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
-| Patching & Upgrades | *Automated*. The provider rolls out security patches, minor versions | *Manual & Risky*. Our team must track CVEs, test patches in staging, and manually execute updates |
-| Scaling             | *Instant*. Scaling vertical or horizontal replicas                   | *Complex*. Requires resizing cloud instances manually                                             |
-| Monitoring          | Built-in dashboards                                                | We must deploy, configure, and maintain our own observability stack                             |
-|---------------------+--------------------------------------------------------------------+-------------------------------------------------------------------------------------------------|
+*** Result
+#+begin_src bash
+$ curl -I http://34.8.172.31/
+HTTP/1.1 200 OK
+Date: Mon, 10 Aug 2026 17:14:27 GMT
+Content-Type: text/html; charset=utf-8
+Via: 1.1 google
+Transfer-Encoding: chunked
+#+end_src
+
+*** Testing
+
+**** Trigger a Manual Run
+  #+begin_src bash
+$ kubectl create job --from=cronjob/project-pg-backup manual-backup-test -n project
+job.batch/manual-backup-test created
+  #+end_src
+
+**** Watch the Job Complete
+  #+begin_src bash
+$ kubectl get jobs -n project
+NAME                 STATUS    COMPLETIONS   DURATION   AGE
+manual-backup-test   Running   0/1           11s        11s
+  #+end_src
+
+**** Check the Logs
+  #+begin_src bash
+$ kubectl logs job/manual-backup-test -n project
+pg_dump: executing SELECT pg_catalog.set_config('search_path', '', false);
+pg_dump: last built-in OID is 16383
+... ...
+pg_dump: executing SEQUENCE SET tasks_id_seq
+pg_dump: creating CONSTRAINT "public.tasks tasks_pkey"
+Copying file:///usr/src/app/backup.sql [Content-Type=application/octet-stream]...
+/ [1 files][  2.2 KiB/  2.2 KiB]
+Operation completed over 1 objects/2.2 KiB.
+Backup successfully uploaded to gs://dwk-project-backup-bucket-764540294746/backup_20260810_171725.sql
+#+end_src
+
+**** Verify in GCS
+  #+begin_src bash
+$ gcloud storage ls gs://dwk-project-backup-bucket-764540294746/
+gs://dwk-project-backup-bucket-764540294746/backup_20260810_171725.sql
+  #+end_src
