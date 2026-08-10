@@ -14,9 +14,12 @@ resources:
   - manifests/app/frontend/deployment.yaml
   - manifests/app/frontend/pvc.yaml
   - manifests/app/frontend/service.yaml
+  - manifests/app/cronjob.yaml
 
 images:
   - name: BACKEND_IMAGE
     newName: BACKEND_IMAGE
   - name: FRONTEND_IMAGE
     newName: FRONTEND_IMAGE
+  - name: PG_BACKUP_IMAGE
+    newName: PG_BACKUP_IMAGE

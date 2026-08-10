@@ -1,19 +1,41 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: wiki-todo-gen
+  name: project-pg-backup
   namespace: project
 spec:
-  schedule: "0 * * * *"  # Runs at the start of every hour
+  schedule: "0 0 * * *" # Runs every day at midnight (00:00 UTC)
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
   jobTemplate:
     spec:
-      backoffLimit: 1
+      backoffLimit: 2
       template:
         spec:
+          serviceAccountName: ksa-backup # Links pod to Workload Identity
+          restartPolicy: OnFailure
           containers:
-            - name: wiki-job
-              image: ushakiran369/wiki-job:2.9.v2
+            - name: pg-backup-job
+              # image:  ushakiran369/pg-backup-job
+              image: PG_BACKUP_IMAGE
+              imagePullPolicy: Always
               env:
-                - name: BACKEND_URL
-                  value: "http://todo-backend-svc"
-          restartPolicy: OnFailure # Changed from Never for resilience
+                - name: POSTGRES_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-todo-creds
+                      key: username
+                - name: POSTGRES_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-todo-creds
+                      key: password
+                - name: POSTGRES_DB
+                  valueFrom:
+                    secretKeyRef:
+                      name: postgres-todo-creds
+                      key: dbname
+                - name: URL
+                  value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-todo-svc.project.svc.cluster.local:5432/$(POSTGRES_DB)"
+                - name: GCS_BUCKET
+                  value: dwk-project-backup-bucket-764540294746

@@ -10,11 +10,12 @@ permissions:
 env:
   PROJECT_ID: ${{ secrets.GKE_PROJECT_ID }}
   GKE_CLUSTER: dwk-cluster
-  GKE_ZONE: asia-south1-a
+  GKE_ZONE: asia-south1-b
   REGISTRY: asia-south1-docker.pkg.dev
   REPOSITORY: uk-docker-repo
   FRONTEND_IMAGE_NAME: todo-frontend
   BACKEND_IMAGE_NAME: todo-backend
+  PG_BACKUP_IMAGE_NAME: pg-backup
   BRANCH: ${{ github.ref_name }}
 
 jobs:
@@ -65,7 +66,15 @@ jobs:
           docker push "$IMAGE_TAG"
           echo "BACKEND_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
 
-      - name: Deploy
+      # Postgres Backup: Build & Push (Fixed typo: -t "$IMAGE_TAG" instead of -t "$IMAGE")
+      - name: Build and Publish PG Backup Image
+        run: |
+          IMAGE_TAG="$REGISTRY/$PROJECT_ID/$REPOSITORY/$PG_BACKUP_IMAGE_NAME:$BRANCH-$GITHUB_SHA"
+          docker buildx build --load -t "$IMAGE_TAG" -f ./todo-app/backup-job/Dockerfile ./todo-app/backup-job
+          docker push "$IMAGE_TAG"
+          echo "PG_BACKUP_IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy to GKE
         run: |
           # Navigate into the todo-app directory where kustomization.yaml lives
           cd ./todo-app
@@ -76,23 +85,22 @@ jobs:
             NAMESPACE="project"
           fi
 
-          # Create the namespace if it does not exist and set it as current
-          # context
+          # Create the namespace if it does not exist and set it as current context
           kubectl create namespace "$NAMESPACE" || true
           kubectl config set-context --current --namespace="$NAMESPACE"
 
-          # Update Kustomize namespace and image tags
+          # Update Kustomize namespace and all three image tags
           kustomize edit set namespace "$NAMESPACE"
           kustomize edit set image BACKEND_IMAGE="$BACKEND_IMAGE_TAG"
           kustomize edit set image FRONTEND_IMAGE="$FRONTEND_IMAGE_TAG"
+          kustomize edit set image PG_BACKUP_IMAGE="$PG_BACKUP_IMAGE_TAG"
 
           # Build and Apply the manifests
           kustomize build . | kubectl apply -f -
 
-          # Wait for rollouts using your correct deployment names in the
-          # dynamic namespace
+          # Wait for rollouts using your correct deployment names in the dynamic namespace
           kubectl rollout status deployment/todo-backend-dep -n "$NAMESPACE"
           kubectl rollout status deployment/todo-frontend-dep -n "$NAMESPACE"
 
-          # View services in the target namespace
-          kubectl get services -n "$NAMESPACE" -o wide
+          # View services and cronjobs in the target namespace
+          kubectl get services,cronjobs -n "$NAMESPACE" -o wide
