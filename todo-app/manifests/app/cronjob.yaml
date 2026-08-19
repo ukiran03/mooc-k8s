@@ -19,6 +19,13 @@ spec:
               # image:  ushakiran369/pg-backup-job
               image: PG_BACKUP_IMAGE
               imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
               env:
                 - name: POSTGRES_USER
                   valueFrom:

@@ -23,3 +23,14 @@ images:
     newName: FRONTEND_IMAGE
   - name: PG_BACKUP_IMAGE
     newName: PG_BACKUP_IMAGE
+
+images:
+  - name: BACKEND_IMAGE
+    newName: ushakiran369/todo-backend
+    newTag: "3.5"
+  - name: FRONTEND_IMAGE
+    newName: ushakiran369/todo-frontend
+    newTag: "2.11"
+  - name: PG_BACKUP_IMAGE
+    newName: ushakiran369/pg-backup-job
+    newTag: latest

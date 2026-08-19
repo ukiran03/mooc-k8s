@@ -60,3 +60,4 @@ relevant exercise subfolder within that tag for faster reviewer navigation.
 ***** GKE features
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.9/todo-app][3.9.]] DBaaS vs DIY
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.10/todo-app][3.10.]] The project, step 18
+- [[https://github.com/ukiran03/mooc-k8s/tree/3.11/todo-app][3.11.]] The project, step 19

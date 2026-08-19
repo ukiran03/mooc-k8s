@@ -1,17 +1,27 @@
-*** 3.10. The project, step 18
+*** 3.11. The project, step 19
 
 #+begin_src bash
 $ kubectl get pods -n project
-NAME                                 READY   STATUS    RESTARTS       AGE
-postgres-todo-stset-0                1/1     Running   0              2m17s
-todo-backend-dep-7478d8998c-bxzms    1/1     Running   3 (109s ago)   2m18s
-todo-frontend-dep-68fc8b8774-klmrw   1/1     Running   0              2m18s
+NAME                                 READY   STATUS    RESTARTS         AGE
+postgres-todo-stset-0                1/1     Running   0                6m51s
+todo-backend-dep-6f9d5dc9b8-n58w9    1/1     Running   14 (9m41s ago)   50m
+todo-frontend-dep-7d644cbf45-8f5ls   1/1     Running   0                76m
 #+end_src
 
 #+begin_src bash
 $ kubectl get ingress -n project
-NAME               CLASS   HOSTS   ADDRESS       PORTS   AGE
-todo-app-ingress   gce     *       34.8.172.31   80      17m
+NAME               CLASS   HOSTS   ADDRESS        PORTS   AGE
+todo-app-ingress   gce     *       8.233.107.33   80      112m
+#+end_src
+
+*** Result
+#+begin_src bash
+$ curl -I http://8.233.107.33/
+HTTP/1.1 200 OK
+Date: Wed, 19 Aug 2026 14:35:29 GMT
+Content-Type: text/html; charset=utf-8
+Via: 1.1 google
+Transfer-Encoding: chunked
 #+end_src
 
 *** Result
@@ -25,36 +35,9 @@ Transfer-Encoding: chunked
 #+end_src
 
 *** Testing
-
-**** Trigger a Manual Run
-  #+begin_src bash
-$ kubectl create job --from=cronjob/project-pg-backup manual-backup-test -n project
-job.batch/manual-backup-test created
-  #+end_src
-
-**** Watch the Job Complete
-  #+begin_src bash
-$ kubectl get jobs -n project
-NAME                 STATUS    COMPLETIONS   DURATION   AGE
-manual-backup-test   Running   0/1           11s        11s
-  #+end_src
-
-**** Check the Logs
-  #+begin_src bash
-$ kubectl logs job/manual-backup-test -n project
-pg_dump: executing SELECT pg_catalog.set_config('search_path', '', false);
-pg_dump: last built-in OID is 16383
-... ...
-pg_dump: executing SEQUENCE SET tasks_id_seq
-pg_dump: creating CONSTRAINT "public.tasks tasks_pkey"
-Copying file:///usr/src/app/backup.sql [Content-Type=application/octet-stream]...
-/ [1 files][  2.2 KiB/  2.2 KiB]
-Operation completed over 1 objects/2.2 KiB.
-Backup successfully uploaded to gs://dwk-project-backup-bucket-764540294746/backup_20260810_171725.sql
-#+end_src
-
 **** Verify in GCS
   #+begin_src bash
 $ gcloud storage ls gs://dwk-project-backup-bucket-764540294746/
+
 gs://dwk-project-backup-bucket-764540294746/backup_20260810_171725.sql
   #+end_src

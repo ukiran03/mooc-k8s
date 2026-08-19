@@ -24,6 +24,13 @@ spec:
           # image: ushakiran369/todo-frontend:2.10
           image: FRONTEND_IMAGE
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
           ports:
             - containerPort: 3000
           env:

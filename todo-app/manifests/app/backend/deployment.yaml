@@ -24,6 +24,13 @@ spec:
           # image: ushakiran369/todo-backend:3.5
           image: BACKEND_IMAGE
           imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
           ports:
             - containerPort: 3001
           env:
