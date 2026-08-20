@@ -1,3 +1,19 @@
+*** 3.12. The project, step 20
+
+*Query from the GKE's Logs Explorer*
+#+begin_src
+resource.type="k8s_container"
+resource.labels.cluster_name="dwk-cluster"
+resource.labels.container_name="todo-backend"
+resource.labels.namespace_name="project"
+#+end_src
+
+#+CAPTION: Todo-App Logs in GKE's Logs Explorer
+#+NAME:   fig:my-image
+#+ATTR_ORG: :width 250
+#+ATTR_HTML: :width 250px
+[[./assets/gke-logs_ex3.12.jpg]]
+
 *** 3.11. The project, step 19
 
 #+begin_src bash
@@ -14,7 +30,7 @@ NAME               CLASS   HOSTS   ADDRESS        PORTS   AGE
 todo-app-ingress   gce     *       8.233.107.33   80      112m
 #+end_src
 
-*** Result
+**** Result
 #+begin_src bash
 $ curl -I http://8.233.107.33/
 HTTP/1.1 200 OK
@@ -24,7 +40,7 @@ Via: 1.1 google
 Transfer-Encoding: chunked
 #+end_src
 
-*** Result
+**** Result
 #+begin_src bash
 $ curl -I http://34.8.172.31/
 HTTP/1.1 200 OK
@@ -34,8 +50,8 @@ Via: 1.1 google
 Transfer-Encoding: chunked
 #+end_src
 
-*** Testing
-**** Verify in GCS
+**** Testing
+***** Verify in GCS
   #+begin_src bash
 $ gcloud storage ls gs://dwk-project-backup-bucket-764540294746/
 
