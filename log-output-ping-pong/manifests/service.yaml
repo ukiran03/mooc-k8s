@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: log-ping-svc
-  namespace: log-ping-gke
+  name: log-output-svc
+  namespace: exercises
 spec:
   type: ClusterIP
   selector:
-    app: log-ping
+    app: log-output
   ports:
     - name: log-http
       protocol: TCP
@@ -16,3 +16,40 @@ spec:
       protocol: TCP
       port: 3001
       targetPort: 3001
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ping-pong-svc
+  namespace: exercises
+spec:
+  type: ClusterIP
+  selector:
+    app: ping-pong
+  ports:
+    - name: ping-http
+      protocol: TCP
+      port: 3001
+      targetPort: 3001
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc
+  namespace: exercises
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+  selector:
+    app: postgres

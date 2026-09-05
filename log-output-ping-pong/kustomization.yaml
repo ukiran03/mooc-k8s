@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: exercises
+
+resources:
+  - manifests/namespace.yaml
+  - manifests/configmap.yaml
+  - manifests/pg-secret.yaml
+  - manifests/gateway.yaml
+  - manifests/service.yaml
+  - manifests/pg-statefulset.yaml
+  - manifests/ping-pong-dep.yaml
+  - manifests/log-output-dep.yaml

@@ -62,3 +62,7 @@ relevant exercise subfolder within that tag for faster reviewer navigation.
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.10/todo-app][3.10.]] The project, step 18
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.11/todo-app][3.11.]] The project, step 19
 - [[https://github.com/ukiran03/mooc-k8s/tree/3.12/todo-app][3.12.]] The project, step 20
+
+**** Chapter 5: GitOps and friends
+***** Update Strategies and Prometheus
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.1/log-output-ping-pong][4.1.]]  Readines probe

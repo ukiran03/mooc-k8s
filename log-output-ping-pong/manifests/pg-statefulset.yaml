@@ -1,46 +1,9 @@
-# Service
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: postgres-svc
-  namespace: log-ping-gke
-  labels:
-    app: postgres
-spec:
-  type: ClusterIP
-  clusterIP: None
-  ports:
-    - protocol: TCP
-      port: 5432
-      targetPort: 5432
-  selector:
-    app: postgres
-
----
-
-# Secret
-
-apiVersion: v1
-kind: Secret
-metadata:
-  name: postgres-creds
-  namespace: log-ping-gke
-type: Opaque
-data:
-  username: dWtpcmFu
-  password: YWJjMTIz
-  dbname: cGluZ3Bvbmdz
-
----
-
 # StatefulSet
-
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: postgres-stset
-  namespace: log-ping-gke
+  namespace: exercises
 spec:
   serviceName: postgres-svc
   replicas: 1
@@ -82,7 +45,7 @@ spec:
         name: postgres-data-storage
       spec:
         accessModes: ["ReadWriteOnce"]
-        # storageClassName: "" -> use cluster default
+        storageClassName: "local-path"  # Add this for k3d
         resources:
           requests:
             storage: 100Mi

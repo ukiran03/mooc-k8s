@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: exercises
+  name: logoutput-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: log-output
+  template:
+    metadata:
+      labels:
+        app: log-output
+    spec:
+      containers:
+        - name: log-output
+          image: ushakiran369/log-output:4.1.v2
+          readinessProbe:
+            initialDelaySeconds: 6
+            periodSeconds: 3
+            httpGet:
+              path: /healthz
+              port: 3000
+          env:
+            - name: LOG_PORT
+              value: "3000"
+            - name: PING_PORT
+              value: "3001"
+            - name: PING_HOST
+              value: "ping-pong-svc"
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  name: log-ping-config
+                  key: MESSAGE
+            - name: INFO_FILE
+              value: /usr/share/app/config/information.txt
+          volumeMounts:
+            - name: config-vol
+              mountPath: /usr/share/app/config
+              readOnly: true
+      volumes:
+        - name: config-vol
+          configMap:
+            name: log-ping-config

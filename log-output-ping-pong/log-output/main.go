@@ -12,6 +12,7 @@ import (
 )
 
 var ( // read fron ENV
+	pingHost    string
 	pingPort    string
 	logPort     string
 	message     string
@@ -40,6 +41,12 @@ func genRandomString() string {
 }
 
 func main() {
+	pingHost = os.Getenv("PING_HOST")
+	if pingHost == "" {
+		fmt.Println("env PING_HOST was unset\nUsing localhost as pingHost")
+		pingHost = "localhost"
+	}
+
 	pingPort = os.Getenv("PING_PORT")
 	if pingPort == "" {
 		fmt.Println("env PING_PORT was unset\nUsing Port 3001 as pingPort")
@@ -70,7 +77,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", homeHandler)
-	mux.HandleFunc("/health", healthcheckHandler)
+	mux.HandleFunc("/healthz", healthcheckHandler)
 
 	log.Printf("Starting log server on port %s...", logPort)
 
@@ -80,7 +87,7 @@ func main() {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	pingCount, err := fetchPingCount(pingPort)
+	pingCount, err := fetchPingCount()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadGateway)
 		log.Println(err.Error())
@@ -98,12 +105,17 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func healthcheckHandler(w http.ResponseWriter, r *http.Request) {
+	if _, err := fetchPingCount(); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: `PingPong` not ready"))
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
 
-func fetchPingCount(pingPort string) (int, error) {
-	hostAddr := "http://localhost:" + pingPort + "/pings"
+func fetchPingCount() (int, error) {
+	hostAddr := "http://" + pingHost + ":" + pingPort + "/pings"
 	client := &http.Client{
 		Timeout: time.Second * 5,
 	}

@@ -33,14 +33,16 @@ func main() {
 
 	db, err := openDB(dbDSN)
 	if err != nil {
-		logger.Error("Failed to connect to database", "error", err)
-		os.Exit(1)
-	}
-	defer db.Close()
-
-	if err := initPingsTable(db); err != nil {
-		logger.Error("Failed to initialize pings table", "error", err)
-		os.Exit(1)
+		logger.Error(
+			"Failed to connect to database at startup (will retry via health check)",
+			"error",
+			err,
+		)
+	} else {
+		defer db.Close()
+		if err := initPingsTable(db); err != nil {
+			logger.Error("Failed to initialize pings table", "error", err)
+		}
 	}
 
 	app := &application{
@@ -58,7 +60,7 @@ func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/{$}", app.homeHandler)
-	mux.HandleFunc("/health", app.healthcheckHandler)
+	mux.HandleFunc("/healthz", app.healthcheckHandler)
 	mux.HandleFunc("/pings", app.getPings)
 
 	// Accept both /pingpong and /pingpong/ for POST requests
@@ -72,10 +74,18 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "visit /pingpong")
 }
 
+// ReadinessProbe for the Ping-pong application. It should be ready when it has
+// a connection to the database.
 func (app *application) healthcheckHandler(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
+	if err := app.model.PgxPing(r.Context()); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("ERROR: DB not ready"))
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
@@ -130,7 +140,20 @@ type PingModel struct {
 	TTL time.Duration
 }
 
+func (m *PingModel) PgxPing(ctx context.Context) error {
+	if m.DB == nil {
+		return fmt.Errorf("DB pool is not initialized")
+	}
+	if err := m.DB.Ping(ctx); err != nil {
+		return fmt.Errorf("DB is not ready: %w", err)
+	}
+	return nil
+}
+
 func (m *PingModel) Increment(ctx context.Context) (int, error) {
+	if m.DB == nil {
+		return 0, fmt.Errorf("database is not available")
+	}
 	stmt := `UPDATE pings SET val = val + 1 RETURNING val`
 
 	ctx, cancel := context.WithTimeout(ctx, m.TTL)
@@ -145,6 +168,9 @@ func (m *PingModel) Increment(ctx context.Context) (int, error) {
 }
 
 func (m *PingModel) Get(ctx context.Context) (int, error) {
+	if m.DB == nil {
+		return 0, fmt.Errorf("database is not available")
+	}
 	stmt := `SELECT val FROM pings LIMIT 1`
 
 	ctx, cancel := context.WithTimeout(ctx, m.TTL)
