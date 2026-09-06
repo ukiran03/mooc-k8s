@@ -12,7 +12,7 @@ spec:
       backoffLimit: 2
       template:
         spec:
-          serviceAccountName: ksa-backup # Links pod to Workload Identity
+          # serviceAccountName: ksa-backup # GKE Workload Identity - comment out for k3d
           restartPolicy: OnFailure
           containers:
             - name: pg-backup-job
@@ -44,5 +44,5 @@ spec:
                       key: dbname
                 - name: URL
                   value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@postgres-todo-svc.project.svc.cluster.local:5432/$(POSTGRES_DB)"
-                - name: GCS_BUCKET
-                  value: dwk-project-backup-bucket-764540294746
+                # - name: GCS_BUCKET
+                #   value: dwk-project-backup-bucket-764540294746  # GKE-specific - comment out for k3d

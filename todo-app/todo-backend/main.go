@@ -7,13 +7,16 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"sync"
 
 	_ "github.com/lib/pq"
 )
 
 type backend struct {
-	tasks  *TaskModel
-	logger *slog.Logger
+	tasks     *TaskModel
+	logger    *slog.Logger
+	broken    bool
+	brokenMux sync.RWMutex
 }
 
 func main() {
@@ -50,12 +53,16 @@ func main() {
 func (app *backend) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	// Health check route for GCE Ingress
-	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("OK"))
-	})
+	// Health check endpoint with database connectivity
+	mux.HandleFunc("GET /health", app.healthCheck)
+	mux.HandleFunc("GET /api/health", app.healthCheck)
+	mux.HandleFunc("GET /", app.healthCheck)
 
+	// Break/fix endpoints for testing (accessible via ingress)
+	mux.HandleFunc("POST /api/break", app.breakApp)
+	mux.HandleFunc("POST /api/fix", app.fixApp)
+
+	// API endpoints
 	mux.HandleFunc("GET /api/tasks", app.getTasks)
 	mux.HandleFunc("POST /api/tasks", app.createTask)
 
@@ -78,4 +85,46 @@ func (b *backend) enableCORS(next http.Handler) http.Handler {
 		// Pass the request to the mux (where it will match GET or POST)
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *backend) healthCheck(w http.ResponseWriter, r *http.Request) {
+	app.brokenMux.RLock()
+	isBroken := app.broken
+	app.brokenMux.RUnlock()
+
+	if isBroken {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("Service is broken"))
+		return
+	}
+
+	// Check database connectivity
+	err := app.tasks.DB.Ping()
+	if err != nil {
+		app.logger.Error("Database health check failed", "error", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		w.Write([]byte("Database connection failed"))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+func (app *backend) breakApp(w http.ResponseWriter, r *http.Request) {
+	app.brokenMux.Lock()
+	app.broken = true
+	app.brokenMux.Unlock()
+	app.logger.Warn("App has been broken")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("App broken"))
+}
+
+func (app *backend) fixApp(w http.ResponseWriter, r *http.Request) {
+	app.brokenMux.Lock()
+	app.broken = false
+	app.brokenMux.Unlock()
+	app.logger.Info("App has been fixed")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("App fixed"))
 }

@@ -21,7 +21,6 @@ spec:
             claimName: todo-frontend-pvc
       containers:
         - name: todo-frontend
-          # image: ushakiran369/todo-frontend:2.10
           image: FRONTEND_IMAGE
           imagePullPolicy: Always
           resources:
@@ -33,6 +32,22 @@ spec:
               memory: 64Mi
           ports:
             - containerPort: 3000
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           env:
             - name: FRONTEND_PORT
               valueFrom:

@@ -18,19 +18,11 @@ resources:
 
 images:
   - name: BACKEND_IMAGE
-    newName: BACKEND_IMAGE
-  - name: FRONTEND_IMAGE
-    newName: FRONTEND_IMAGE
-  - name: PG_BACKUP_IMAGE
-    newName: PG_BACKUP_IMAGE
-
-images:
-  - name: BACKEND_IMAGE
     newName: ushakiran369/todo-backend
-    newTag: "3.5"
+    newTag: "4.2.v2"
   - name: FRONTEND_IMAGE
     newName: ushakiran369/todo-frontend
-    newTag: "2.11"
+    newTag: "4.2.v2"
   - name: PG_BACKUP_IMAGE
     newName: ushakiran369/pg-backup-job
     newTag: latest

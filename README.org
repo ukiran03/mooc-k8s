@@ -66,3 +66,4 @@ relevant exercise subfolder within that tag for faster reviewer navigation.
 **** Chapter 5: GitOps and friends
 ***** Update Strategies and Prometheus
 - [[https://github.com/ukiran03/mooc-k8s/tree/4.1/log-output-ping-pong][4.1.]]  Readines probe
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.2/todo-app][4.2.]] The project, step 21

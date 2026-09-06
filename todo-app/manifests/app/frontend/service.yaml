@@ -3,8 +3,6 @@ kind: Service
 metadata:
   name: todo-frontend-svc
   namespace: project
-  annotations:
-    cloud.google.com/neg: '{"ingress": true}' # <-- Enables NEG generation for Ingress
 spec:
   selector:
     app: todo-frontend

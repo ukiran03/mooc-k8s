@@ -19,9 +19,20 @@ spec:
         - name: todo-backend-vol
           persistentVolumeClaim:
             claimName: todo-backend-pvc
+      initContainers:
+        - name: wait-for-postgres
+          image: postgres:latest
+          command:
+            - sh
+            - -c
+            - |
+              until pg_isready -h postgres-todo-svc -p 5432; do
+                echo "Waiting for PostgreSQL to be ready..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
       containers:
         - name: todo-backend
-          # image: ushakiran369/todo-backend:3.5
           image: BACKEND_IMAGE
           imagePullPolicy: Always
           resources:
@@ -33,6 +44,22 @@ spec:
               memory: 128Mi
           ports:
             - containerPort: 3001
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
           env:
             - name: BACKEND_PORT
               valueFrom:
