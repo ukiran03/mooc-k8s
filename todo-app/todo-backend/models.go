@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"log"
 	"slices"
 )
@@ -13,6 +13,17 @@ const (
 	StateTodo TaskState = iota
 	StateDone
 )
+
+func (s TaskState) String() string {
+	switch s {
+	case StateTodo:
+		return "Created New Task"
+	case StateDone:
+		return "Task Marked Done"
+	default:
+		return "Unknown State"
+	}
+}
 
 type Task struct {
 	ID    int       `json:"id"`
@@ -61,22 +72,19 @@ func (m *TaskModel) Insert(title string, state TaskState) (int, error) {
 	return id, nil
 }
 
-func (m *TaskModel) Update(id int, state TaskState) error {
-	stmt := `UPDATE tasks SET state = $1 WHERE id = $2`
-	result, err := m.DB.Exec(stmt, state, id)
+func (m *TaskModel) Update(id int, state TaskState) (string, error) {
+	stmt := `UPDATE tasks SET state = $1 WHERE id = $2 RETURNING title`
+
+	var title string
+	err := m.DB.QueryRow(stmt, state, id).Scan(&title)
 	if err != nil {
-		return err
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", &ErrNoTaskFound{ID: id}
+		}
+		return "", err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf(
-			"could not update: no task found with ID %d", id,
-		)
-	}
-	return nil
+
+	return title, nil
 }
 
 func (m *TaskModel) Delete(id int) error {

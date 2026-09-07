@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: project
+  name: todo-broadcaster-dep
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: todo-broadcaster
+  template:
+    metadata:
+      labels:
+        app: todo-broadcaster
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: todo-broadcaster
+          image: BROADCASTER_IMAGE
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          env:
+            - name: NATS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: NATS_URL
+            - name: NATS_SUBJECT
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: NATS_SUBJECT
+          envFrom:
+            - secretRef:
+                name: todo-app-secrets

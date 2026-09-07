@@ -1,11 +1,8 @@
-module ukiran.mooc/todo-backend
+module ukiran.mooc/todo-broadcaster
 
-go 1.26.4
+go 1.26.5
 
-require (
-	github.com/lib/pq v1.12.3
-	github.com/nats-io/nats.go v1.53.1
-)
+require github.com/nats-io/nats.go v1.53.1
 
 require (
 	github.com/klauspost/compress v1.18.5 // indirect

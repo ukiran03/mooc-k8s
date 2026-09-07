@@ -91,6 +91,16 @@ spec:
                 secretKeyRef:
                   name: postgres-todo-creds
                   key: dbname
+            - name: NATS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: NATS_URL
+            - name: NATS_SUBJECT
+              valueFrom:
+                configMapKeyRef:
+                  name: todo-app-config
+                  key: NATS_SUBJECT
 
           volumeMounts:
             - name: todo-backend-vol

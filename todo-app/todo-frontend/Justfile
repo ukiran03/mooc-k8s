@@ -1,0 +1,10 @@
+image := "ushakiran369/todo-frontend"
+
+# List all available recipes
+default:
+    @just --list
+
+# Build and push the Docker image to the registry (Usage: just release <tag>)
+release tag:
+    docker build -t {{image}}:{{tag}} .
+    docker push {{image}}:{{tag}}

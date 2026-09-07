@@ -68,8 +68,10 @@ spec:
             exec:
               command:
                 - pg_isready
-                - -U
-                - $(POSTGRES_USER)
+                - -h
+                - localhost
+                - -p
+                - "5432"
             initialDelaySeconds: 30
             periodSeconds: 10
             timeoutSeconds: 5
@@ -78,8 +80,10 @@ spec:
             exec:
               command:
                 - pg_isready
-                - -U
-                - $(POSTGRES_USER)
+                - -h
+                - localhost
+                - -p
+                - "5432"
             initialDelaySeconds: 5
             periodSeconds: 5
             timeoutSeconds: 3
