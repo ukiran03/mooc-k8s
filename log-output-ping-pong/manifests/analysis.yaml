@@ -1,0 +1,32 @@
+# Exercise Question:
+# Create an AnalysisTemplate (CRD of Argo Rollouts) the Ping-pong app that will
+# follow the CPU usage of all containers in the namespace.
+#
+# If the CPU usage rate sum for the namespace increases above a set value (you
+# may choose a good hardcoded value) within 5 minutes, revert the update.
+#
+# Make sure that the application doesn't get updated, if the value is set too
+# low.
+
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: namespace-cpu-limit-check
+  namespace: exercises
+spec:
+  metrics:
+  - name: namespace-cpu-usage
+    # How often to evaluate the metric during the rollout phase
+    interval: 30s
+    # Number of times the metric can fail before the rollout is aborted and reverted
+    failureLimit: 2
+    # Total number of times the metric will be checked
+    count: 10
+    # Success condition: passes if the sum of CPU usage rate is below 2.0 cores
+    successCondition: result[0] < 2.0
+    provider:
+      prometheus:
+        # Update this URL to point to your cluster's Prometheus service
+        address: http://prom-prometheus-server.monitoring.svc.cluster.local # port 80
+        query: |
+          sum(rate(container_cpu_usage_seconds_total{namespace="exercises"}[5m]))

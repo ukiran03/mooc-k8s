@@ -9,5 +9,7 @@ resources:
   - manifests/gateway.yaml
   - manifests/service.yaml
   - manifests/pg-statefulset.yaml
-  - manifests/ping-pong-dep.yaml
+  # - manifests/ping-pong-dep.yaml
+  - manifests/ping-pong-rollout.yaml
   - manifests/log-output-dep.yaml
+  - manifests/analysis.yaml

@@ -1,46 +1,25 @@
-** 4.1 Readines probe
+** 4.4. Your canary
+
+Checkout the manifest files:
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.4/log-output-ping-pong/manifests/analysis.yaml][AnalysisTemplate (analysis.yaml)]]
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.4/log-output-ping-pong/manifests/ping-pong-rollout.yaml][Ping-Pong Rollout (ping-pong-rollout.yaml)]]
 
 *** Verification & Output
-#+begin_src bash
-$ kubectl get pods -n exercises
-NAME                             READY   STATUS    RESTARTS   AGE
-logoutput-dep-6987c57d85-58dfl   1/1     Running   0          9m49s
-pingpong-dep-56575866dc-jjdln    1/1     Running   0          68s
-postgres-stset-0                 1/1     Running   0          9m49s
-#+end_src
-
-*** Using kubectl port-forward
-
-**** Test log-output
-#+begin_src bash
-$ kubectl port-forward svc/log-output-svc 3000:3000 -n exercises
-Forwarding from 127.0.0.1:3000 -> 3000
-Forwarding from [::1]:3000 -> 3000
-#+end_src
 
 #+begin_src bash
-$ curl http://localhost:3000/
-Hello from the ConfigMap env!
-This is the content of the file from ConfigMap.
-
-2026-09-05 19:10:13 72eecd73
- Ping / Pongs: 3
-
-$ curl http://localhost:3000/healthz
-OK
+$ kubectl get analysisruns -n exercises
+NAME                          STATUS       AGE
+pingpong-dep-7cdd57fd7c-2-2   Successful   17m
 #+end_src
 
-**** Test ping-pong
-#+begin_src bash
-$ kubectl port-forward svc/ping-pong-svc 3001:3001 -n exercises
-Forwarding from 127.0.0.1:3001 -> 3001
-Forwarding from [::1]:3001 -> 3001
+**** Prometheus
+Query
+#+begin_src
+sum(rate(container_cpu_usage_seconds_total{namespace="exercises"}[5m]))
 #+end_src
 
-#+begin_src bash
-$ curl -X POST http://localhost:3001/pingpong
-ping 4
+The metric value stays below our =2.0= threshold.
 
-$ curl http://localhost:3001/pings
-ping 4
-#+end_src
+#+ATTR_ORG: :width 250
+#+ATTR_HTML: :width 250px
+[[./assets/prometheus-metrics.jpg]]
