@@ -1,23 +1,21 @@
-*** 4.2. The project, step 21
-#+begin_src bash
+*** 4.5. The project, step 22
+
+#+begin_src
 $ kubectl get pods -n project
-NAME                               READY   STATUS    RESTARTS      AGE
-postgres-todo-stset-0              1/1     Running   0             19m
-todo-backend-dep-bb785d866-gchz9   1/1     Running   2 (119s ago)  19m
-todo-frontend-dep-7564c77d45-s6br7 1/1     Running   0             19m
+NAME                                READY   STATUS    RESTARTS       AGE
+postgres-todo-stset-0               1/1     Running   0              2m47s
+todo-backend-dep-565994bbd4-ts9x6   1/1     Running   0              2m47s
+todo-frontend-dep-9dbbd6895-8mlnh   1/1     Running   1 (2m4s ago)   2m47s
 #+end_src
 
-**** Initial state (healthy)
-#+ATTR_ORG: :width 250
-#+ATTR_HTML: :width 250px
-[[./assets/healthy.jpg]]
+#+begin_src bash
+xdg-open http://localhost:8081
+#+end_src
 
-**** Clicking the break button (unhealthy state)
 #+ATTR_ORG: :width 250
 #+ATTR_HTML: :width 250px
-[[./assets/break-app.jpg]]
+[[./assets/4.5-part1.jpg]]
 
-**** Starting a new backend pod 🔄
 #+ATTR_ORG: :width 250
 #+ATTR_HTML: :width 250px
-[[./assets/unhealthy.jpg]]
+[[./assets/4.5-part2.jpg]]

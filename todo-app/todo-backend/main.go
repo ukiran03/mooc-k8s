@@ -65,6 +65,7 @@ func (app *backend) routes() http.Handler {
 	// API endpoints
 	mux.HandleFunc("GET /api/tasks", app.getTasks)
 	mux.HandleFunc("POST /api/tasks", app.createTask)
+	mux.HandleFunc("PUT /api/tasks/{id}/done", app.markDoneTask)
 
 	return app.enableCORS(mux)
 }

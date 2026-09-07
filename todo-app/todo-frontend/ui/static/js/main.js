@@ -1,49 +1,78 @@
 document.addEventListener("DOMContentLoaded", () => {
   const taskForm = document.getElementById("taskForm");
-  if (!taskForm) return;
-
-  // Pull the URL directly from the template data attribute
-  const backendUrl = taskForm.getAttribute("data-url");
-
-  taskForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const titleInput = document.getElementById("taskTitle");
-    const data = {
-      title: titleInput.value,
-      state: 0,
-    };
-
-    try {
-      const response = await fetch(backendUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        // Clear input and reload to show the new task
-        titleInput.value = "";
-        window.location.reload();
-      } else {
-        const errorText = await response.text();
-        console.error("Server Error Detail:", errorText);
-        alert(`Server error: ${response.status}`);
-      }
-    } catch (err) {
-      console.error("Fetch Error:", err);
-      alert("Connection failed. Is the backend running at " + backendUrl + "?");
-    }
-  });
-
-  // Health status indicator
   const healthStatus = document.getElementById("healthStatus");
   const breakBtn = document.getElementById("breakAppBtn");
   let isBroken = false;
 
-  // Function to check health status
+  // Task Form Submission
+  if (taskForm) {
+    const backendUrl = taskForm.getAttribute("data-url");
+
+    taskForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const titleInput = document.getElementById("taskTitle");
+      const data = {
+        title: titleInput.value,
+        state: 0,
+      };
+
+      try {
+        const response = await fetch(backendUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+
+        if (response.ok) {
+          titleInput.value = "";
+          window.location.reload();
+        } else {
+          const errorText = await response.text();
+          console.error("Server Error Detail:", errorText);
+          alert(`Server error: ${response.status}`);
+        }
+      } catch (err) {
+        console.error("Fetch Error:", err);
+        alert(
+          "Connection failed. Is the backend running at " + backendUrl + "?",
+        );
+      }
+    });
+  }
+
+  // Handle "Mark Done" button clicks (Event Delegation scoped inside DOMContentLoaded)
+  document.addEventListener("click", async (e) => {
+    const markDoneBtn = e.target.closest(".mark-done-btn");
+    if (!markDoneBtn) return;
+
+    const taskId = markDoneBtn.getAttribute("data-id");
+    if (!taskId) return;
+
+    try {
+      const response = await fetch(`/api/tasks/${taskId}/done`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        window.location.reload();
+      } else {
+        const errorText = await response.text();
+        console.error("Failed to mark task done:", errorText);
+        alert(`Failed to update task: ${response.status}`);
+      }
+    } catch (err) {
+      console.error("Network Error:", err);
+      alert("Connection failed while updating task.");
+    }
+  });
+
+  // Health status check function
   async function checkHealth() {
     try {
       const response = await fetch("/api/health");
@@ -58,27 +87,23 @@ document.addEventListener("DOMContentLoaded", () => {
           breakBtn.className = "break-btn";
         }
       } else {
-        isBroken = true;
-        if (healthStatus) {
-          healthStatus.textContent = "✗ Backend Unhealthy";
-          healthStatus.className = "health-status unhealthy";
-        }
-        if (breakBtn) {
-          breakBtn.textContent = "Fix App";
-          breakBtn.className = "break-btn fix-mode";
-        }
+        handleUnhealthyState();
       }
     } catch (err) {
       console.error("Health check failed:", err);
-      isBroken = true;
-      if (healthStatus) {
-        healthStatus.textContent = "✗ Backend Unreachable";
-        healthStatus.className = "health-status unhealthy";
-      }
-      if (breakBtn) {
-        breakBtn.textContent = "Fix App";
-        breakBtn.className = "break-btn fix-mode";
-      }
+      handleUnhealthyState();
+    }
+  }
+
+  function handleUnhealthyState() {
+    isBroken = true;
+    if (healthStatus) {
+      healthStatus.textContent = "✗ Backend Unhealthy";
+      healthStatus.className = "health-status unhealthy";
+    }
+    if (breakBtn) {
+      breakBtn.textContent = "Fix App";
+      breakBtn.className = "break-btn fix-mode";
     }
   }
 
@@ -95,12 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (response.ok) {
-          if (isBroken) {
-            alert("App has been fixed!");
-          } else {
-            alert("App has been broken! The pod will restart shortly.");
-          }
-          // Check health status after action
+          alert(
+            isBroken
+              ? "App has been fixed!"
+              : "App has been broken! The pod will restart shortly.",
+          );
           setTimeout(checkHealth, 1000);
         } else {
           alert("Failed to toggle app state: " + response.status);
@@ -112,9 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initial health check
+  // Initialize checks
   checkHealth();
-
-  // Periodic health check every 5 seconds
   setInterval(checkHealth, 5000);
 });

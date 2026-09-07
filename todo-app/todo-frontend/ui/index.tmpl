@@ -31,13 +31,20 @@
 					Add Task
 				</button>
 			</form>
+
 			<ul class="todo-list">
 				{{range .Tasks}}
-				<li class="todo-item">
-					{{Print .}}
+				<li class="todo-item {{if IsDone .}}completed{{end}}">
+					<span class="title">{{.Title}}</span>
+					{{if IsDone .}}
+					<span class="todo-done-badge">Done</span>
+					{{else}}
+					<button type="button" class="todo-action-btn mark-done-btn" data-id="{{.ID}}">Mark Done</button>
+					{{end}}
 				</li>
 				{{end}}
 			</ul>
+
 			<div class="health-status" id="healthStatus">
 				Checking backend health...
 			</div>

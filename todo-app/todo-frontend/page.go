@@ -24,8 +24,16 @@ func Print(t *Task) string {
 	return fmt.Sprintf("%s %s\n", state, t.Title)
 }
 
+func IsDone(t *Task) bool {
+	if t.State == StateDone {
+		return true
+	}
+	return false
+}
+
 var tmplFuncs = template.FuncMap{
-	"Print": Print,
+	"Print":  Print,
+	"IsDone": IsDone,
 }
 
 func newTemplateCache() (*template.Template, error) {

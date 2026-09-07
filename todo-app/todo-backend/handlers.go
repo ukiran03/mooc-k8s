@@ -1,10 +1,9 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
+	"strconv"
 	"unicode/utf8"
 )
 
@@ -62,44 +61,26 @@ func (app *backend) createTask(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 }
 
-func (app *backend) readJSON(
-	w http.ResponseWriter,
-	r *http.Request,
-	dst any,
-) error {
-	r.Body = http.MaxBytesReader(w, r.Body, 1048576)
-	dec := json.NewDecoder(r.Body)
-	dec.DisallowUnknownFields() // Disallow unknown fields
-
-	err := dec.Decode(dst)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (app *backend) writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	if err := json.NewEncoder(w).Encode(v); err != nil {
-		log.Printf("Error encoding JSON: %v", err) // to debug
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func (app *backend) markDoneTask(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
-}
 
-func (app *backend) serverError(
-	w http.ResponseWriter,
-	r *http.Request,
-	err error,
-) {
-	var (
-		method = r.Method
-		uri    = r.URL.RequestURI()
-	)
-	app.logger.Error(err.Error(), "method", method, "uri", uri)
+	idStr := r.PathValue("id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		http.Error(w, "Invalid Task ID", http.StatusBadRequest)
+		return
+	}
 
-	http.Error(w,
-		http.StatusText(http.StatusInternalServerError),
-		http.StatusInternalServerError)
+	err = app.tasks.Update(id, StateDone)
+	if err != nil {
+		app.logger.Error(err.Error())
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.logger.Info("task marked done", "id", id)
+	w.WriteHeader(http.StatusAccepted)
 }

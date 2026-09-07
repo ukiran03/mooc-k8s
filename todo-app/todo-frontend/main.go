@@ -27,7 +27,7 @@ const (
 	imageURL = "https://picsum.photos/250/250"
 
 	pageTitle   = "Todo App"
-	pageMessage = "(Ex: 4.2)"
+	pageMessage = "(Ex: 4.5)"
 )
 
 var (

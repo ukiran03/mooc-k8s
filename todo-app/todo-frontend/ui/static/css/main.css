@@ -102,7 +102,7 @@ h1 {
     padding: 12px 24px;
     font-size: 1rem;
     font-weight: 600;
-    background-color: #0070f3;
+    background-color: #22543d;
     color: white;
     border: none;
     border-radius: 8px;
@@ -132,6 +132,39 @@ h1 {
     border-left: 4px solid #0070f3;
     font-size: 1rem;
     word-break: break-word;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.todo-item.completed {
+    border-left: 4px solid #888;
+}
+
+.todo-item.completed .title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.todo-done-badge {
+    color: #22543d;
+    font-weight: 700;
+}
+
+.todo-action-btn {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background-color: #0070f3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.todo-action-btn:hover {
+    background-color: #0051b3;
 }
 
 .health-status {
