@@ -1,14 +1,3 @@
-** 4.7. Baby steps to GitOps
-
-#+begin_src bash
-kubectl apply -f argocd-gitops.yaml -n argocd
-#+end_src
-
-*** Github Workflow
-
-- [[https://github.com/ukiran03/mooc-k8s/tree/4.7/.github/workflows/log-output-gitops.yaml][Workflow for GitOps (.github/workflows/log-output-gitops.yaml)]]
-
-#+begin_src yaml
 name: Log Output Ping Pong CI
 
 on:
@@ -67,39 +56,3 @@ jobs:
           cwd: 'log-output-ping-pong'
           add: 'kustomization.yaml'
           message: 'New version released ${{ github.sha }}'
-#+end_src
-
-*** ArgoCD WEB UI
-
-#+ATTR_ORG: :width 250
-#+ATTR_HTML: :width 250px
-[[./assets/4.7-log-output-gitops-argocd.jpg]]
-
-*** Important BugFix (Help of DevinAI)
-
-- Fix Gateway port from 80 to 8000 to match Traefik entryPoint :: The Gateway
-  was using port 80 with HTTP protocol, but Traefik only has entryPoints
-  configured for port 8000 (web), not port 80. This caused the Gateway to be in
-  a degraded state because it couldn't find a matching entryPoint for the
-  specified port and protocol. (Thanks to DevinAI)
-
-
-#+begin_src yaml
-apiVersion: gateway.networking.k8s.io/v1
-kind: Gateway
-metadata:
-  name: log-ping-gateway
-  namespace: exercises
-spec:
-  gatewayClassName: traefik
-  listeners:
-  - name: http
-    protocol: HTTP
-    # port: 80 <-- INCORRECT
-    port: 8000
-    allowedRoutes:
-      kinds:
-      - kind: HTTPRoute
-        group: gateway.networking.k8s.io
-
-#+end_src

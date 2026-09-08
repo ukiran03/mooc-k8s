@@ -9,7 +9,14 @@ resources:
   - manifests/gateway.yaml
   - manifests/service.yaml
   - manifests/pg-statefulset.yaml
-  # - manifests/ping-pong-dep.yaml
-  - manifests/ping-pong-rollout.yaml
+  - manifests/ping-pong-dep.yaml
   - manifests/log-output-dep.yaml
   - manifests/analysis.yaml
+
+images:
+  - name: LOG_OUTPUT_IMAGE
+    newName: ushakiran369/log-output
+    newTag: "4.1.v2"
+  - name: PING_PONG_IMAGE
+    newName: ushakiran369/ping-pong
+    newTag: "4.1.v3"

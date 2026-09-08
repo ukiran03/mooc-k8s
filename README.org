@@ -72,3 +72,5 @@ relevant exercise subfolder within that tag for faster reviewer navigation.
 - [[https://github.com/ukiran03/mooc-k8s/tree/4.5/todo-app][4.5.]] The project, step 22
 ***** Messagin systems
 - [[https://github.com/ukiran03/mooc-k8s/tree/4.6/todo-app][4.6.]] The project, step 23
+***** GitOps
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.7/log-output-ping-pong][4.7.]]  Baby steps to GitOps

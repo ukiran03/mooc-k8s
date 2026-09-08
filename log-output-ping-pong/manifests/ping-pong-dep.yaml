@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: ping-pong
-          image: ushakiran369/ping-pong:4.1.v3
+          image: PING_PONG_IMAGE
           readinessProbe:
             initialDelaySeconds: 6
             periodSeconds: 3

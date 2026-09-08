@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: log-output
-          image: ushakiran369/log-output:4.1.v2
+          image: LOG_OUTPUT_IMAGE
           readinessProbe:
             initialDelaySeconds: 6
             periodSeconds: 3
