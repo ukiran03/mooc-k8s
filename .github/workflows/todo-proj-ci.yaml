@@ -1,0 +1,69 @@
+name: Todo App CI
+
+on:
+  push: &trigger-config
+    branches: [main]
+    paths:
+      - 'todo-app/**'
+  pull_request:
+    <<: *trigger-config
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-test:
+    name: Build, Push, Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Images
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          declare -A image_map=(
+            ["todo-backend"]="todo-backend"
+            ["todo-frontend"]="todo-frontend"
+            ["broadcaster"]="todo-broadcaster"
+          )
+          TAG="${COMMIT_SHA:-latest}"
+          for dir in "${!image_map[@]}"; do
+            repo_name="${image_map[$dir]}"
+            IMAGE_TAG="ushakiran369/$repo_name:$TAG"
+            docker build --tag "$IMAGE_TAG" "./todo-app/$dir/"
+            docker push "$IMAGE_TAG"
+          done
+
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v3
+
+      - name: Update Kustomization Images
+        working-directory: ./todo-app
+        env:
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          TAG="${COMMIT_SHA:-latest}"
+          declare -A kustomize_map=(
+            ["BACKEND_IMAGE"]="ushakiran369/todo-backend:$TAG"
+            ["FRONTEND_IMAGE"]="ushakiran369/todo-frontend:$TAG"
+            ["BROADCASTER_IMAGE"]="ushakiran369/todo-broadcaster:$TAG"
+          )
+          for name in "${!kustomize_map[@]}"; do
+            kustomize edit set image "$name=${kustomize_map[$name]}"
+          done
+
+      - name: Commit kustomization.yaml to GitHub
+        uses: EndBug/add-and-commit@v10
+        with:
+          cwd: 'todo-app'
+          add: 'kustomization.yaml'
+          message: 'New version released ${{ github.sha }}'

@@ -31,8 +31,3 @@ images:
   - name: PG_BACKUP_IMAGE
     newName: ushakiran369/pg-backup-job
     newTag: latest
-
-secretGenerator:
-  - name: todo-app-secrets
-    envs:
-      - .env.secret
