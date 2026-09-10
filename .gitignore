@@ -1,3 +1,5 @@
 /_ref/
 /todo-app/.env.secret
 /log-output-ping-pong/_ref/
+/todo-app/_ref/
+_*

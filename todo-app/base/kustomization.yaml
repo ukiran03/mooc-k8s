@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Base resources shared across all environments
+resources:
+  - app/namespace.yaml
+  - app/configmap.yaml
+  # - app/secrets.yaml # Apply Manually
+  - app/ingress.yaml
+  - app/backend/deployment.yaml
+  - app/backend/service.yaml
+  - app/backend/pvc.yaml
+  - app/frontend/deployment.yaml
+  - app/frontend/service.yaml
+  - app/frontend/pvc.yaml
+  - app/broadcaster/deployment.yaml
+  - app/database/pg-statefulset.yaml
+  - app/nats/deployment.yaml
+  - app/cronjob.yaml
+
+# [Removed] Base images configuration (will be overridden by environments)
+
+# Secrets are applied separately outside of GitOps workflow
+# They should be manually applied to the target namespaces

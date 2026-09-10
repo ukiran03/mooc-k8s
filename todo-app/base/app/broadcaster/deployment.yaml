@@ -37,6 +37,3 @@ spec:
                 configMapKeyRef:
                   name: todo-app-config
                   key: NATS_SUBJECT
-          envFrom:
-            - secretRef:
-                name: todo-app-secrets

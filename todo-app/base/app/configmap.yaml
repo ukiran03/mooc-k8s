@@ -9,5 +9,6 @@ data:
   BACKEND_URL: "http://todo-backend-svc"
   DB_HOST: "postgres-todo-svc"
   DB_PORT: "5432"
-  NATS_URL: "nats://my-nats.project.svc.cluster.local:4222"
-  NATS_SUBJECT: "todo-broadcaster.broadcast"
+  NATS_URL: "nats://my-nats:4222" # Since both backend and NATS are deployed in
+                                  # the same namespace
+  NATS_SUBJECT: "tasks.broadcast"

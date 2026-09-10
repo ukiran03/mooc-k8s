@@ -1,44 +1,47 @@
-** 4.8
+** 4.9. The project, step 25
 
 *** Github Workflow
-- [[https://github.com/ukiran03/mooc-k8s/tree/4.8/.github/workflows/todo-proj-ci.yaml][Workflow for GitOps (.github/workflows/todo-proj-ci.yaml)]]
+- [[https://github.com/ukiran03/mooc-k8s/tree/4.9/.github/workflows/todo-proj-ci.yaml][Workflow for GitOps (.github/workflows/todo-proj-ci.yaml)]]
 
+*** ArgoCD WEB UI
 
-*** Running ArgoCD
-#+begin_src bash
-$ kubectl get pods -n argocd
-NAME                                                READY   STATUS    RESTARTS   AGE
-argocd-application-controller-0                     1/1     Running   0          26m
-argocd-applicationset-controller-79bbd8c9cd-ml4nj   1/1     Running   0          26m
-argocd-dex-server-6cdf75744-b6ldw                   1/1     Running   0          26m
-argocd-notifications-controller-65878667c-ppfq9     1/1     Running   0          26m
-argocd-redis-5f664b9b9c-t8ksd                       1/1     Running   0          26m
-argocd-repo-server-7f58d7cdf7-c24mv                 1/1     Running   0          26m
-argocd-server-6ccd556fc9-wzvvg                      1/1     Running   0          26m
-#+end_src
-
-**** Apply Todo-App's GitOps config
-#+begin_src bash
-~/prog/mooc-k8s/todo-app on  main (k8s k3s-default:argocd)
-$ kubectl apply -f argocd-gitops.yaml -n argocd
-application.argoproj.io/todo-app-project created
-#+end_src
-
-**** Check the Todo-App namespace
-
-#+begin_src bash
-
-$ kubectl get pods -n project
-NAME                                    READY   STATUS    RESTARTS        AGE
-my-nats-66b55b6498-67h45                1/1     Running   0               4m1s
-postgres-todo-stset-0                   1/1     Running   0               4m1s
-todo-backend-dep-7c757644f4-dmzmt       1/1     Running   0               4m1s
-todo-broadcaster-dep-85fc65c5c8-4lpgz   1/1     Running   0               4m1s
-todo-frontend-dep-5b8f7b777f-nbz7t      1/1     Running   1 (2m57s ago)   4m1s
-#+end_src
-
-**** ArgoCD WEB UI
-
+**** Staging Environment
 #+ATTR_ORG: :width 250
 #+ATTR_HTML: :width 250px
-[[./assets/todo-app-argocd-gitops.jpg]]
+[[./assets/todo-app-staging.jpg]]
+
+**** Production Environment
+#+ATTR_ORG: :width 250
+#+ATTR_HTML: :width 250px
+[[./assets/todo-app-production.jpg]]
+
+*** Important Notes and Fixes
+
+
+1. Kustomize enforces a security restriction preventing a ~kustomization.yaml~
+   file from referencing files outside of its own directory tree using ~../~
+   paths.
+   #+begin_src text
+  # ArgoCD Error
+  Failed to load target state: failed to generate manifest for source 1 of 1: rpc
+  error: code = Unknown desc = `kustomize build <path to cached source>/todo-app/staging`
+
+  failed exit status 1: Error: accumulating resources: accumulation
+  err='accumulating resources from '../manifests/app/configmap.yaml': security;
+  file '<path to cached source>/todo-app/manifests/app/configmap.yaml' is not in
+  or below '<path to cached source>/todo-app/staging'': must build at directory:
+  '<path to cached source>/todo-app/manifests/app/configmap.yaml': file is not
+  directory
+   #+end_src
+
+2. Remove ~namespace.yaml as resource~ from staging & production (because having two
+   different Namespace definitions pointing to the name staging)
+
+3. Remove the envFrom block from base/app/broadcaster/deployment.yaml so it
+   doesn't try to look up production secrets in staging.
+   1. Keep the ~base~ independent and remove ~envFrom~ map, This should be patched
+      in the ~Production~ env
+
+4. ArgoCD Tag Pattern Matching :: Does not accept regexp patterns like ~"v4.*"~
+
+5. GitHub Actions Handles Detached Heads On Tag Triggers

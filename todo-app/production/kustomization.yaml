@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: production
+
+# Production-specific resources
+resources:
+  - ../base
+
+# Note: Secrets are applied separately via kubectl apply -f secrets.yaml
+# Production requires real Telegram credentials for the broadcaster
+
+patches:
+  - path: broadcaster-prod-patch.yaml
+    target:
+      kind: Deployment
+      name: todo-broadcaster-dep
+
+# Production-specific image tags (updated by CI workflow on tags)
+images:
+  - name: BACKEND_IMAGE
+    newName: ushakiran369/todo-backend
+    newTag: "4.9"
+  - name: FRONTEND_IMAGE
+    newName: ushakiran369/todo-frontend
+    newTag: "4.9"
+  - name: BROADCASTER_IMAGE
+    newName: ushakiran369/todo-broadcaster
+    newTag: "4.9"

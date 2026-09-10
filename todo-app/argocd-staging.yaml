@@ -1,17 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: todo-app-production
+  name: todo-app-staging
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/ukiran03/mooc-k8s.git
-    path: ./todo-app/production
-    targetRevision: "4.9"
+    path: ./todo-app/staging
+    targetRevision: main
   destination:
     server: https://kubernetes.default.svc
-    namespace: production
+    namespace: staging
   syncPolicy:
     automated:
       prune: true
